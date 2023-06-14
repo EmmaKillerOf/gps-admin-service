@@ -1,0 +1,45 @@
+{
+    "name": "GPS_ADMIN",
+    "version": "1.0.0",
+    "description": "GPS admin service",
+    "main": "./src/server",
+    "scripts": {
+        "start": "cross-env NODE_ENV=production node ./src/server.js",
+        "start:dev": "cross-env NODE_ENV=staging nodemon ./src/server.js",
+        "start:prod": "cross-env NODE_ENV=production node ./src/server.js",
+        "start:local": "cross-env NODE_ENV=development nodemon ./src/server.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "author": "Peter Barranco Alfaro",
+    "license": "ISC",
+    "homepage": "",
+    "dependencies": {
+        "axios": "^0.20.0",
+        "axios-retry": "^3.1.9",
+        "bcrypt": "^5.0.0",
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "cross-env": "^7.0.3",
+        "express": "^4.17.1",
+        "fs": "0.0.1-security",
+        "https": "^1.0.0",
+        "joi": "^17.7.0",
+        "jsonwebtoken": "^8.5.1",
+        "jstoxml": "^3.2.3",
+        "mailgun-js": "^0.22.0",
+        "moment": "^2.29.1",
+        "morgan": "^1.10.0",
+        "mysql2": "^2.3.3",
+        "sequelize": "^6.28.0",
+        "underscore": "^1.10.2",
+        "uuid": "^8.3.2",
+        "xml-js": "^1.6.11",
+        "yup": "^0.32.11"
+    },
+    "devDependencies": {
+        "sequelize-cli": "^6.5.2"
+    }
+}

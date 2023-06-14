@@ -1,0 +1,18 @@
+{
+
+    "DB": {
+        "username": "root",
+        "password": "200319",
+        "database": "gps",
+        "host": "127.0.0.1",
+        "dialect": "mysql",
+        "query": { 
+            "raw": true,
+            "nest": true
+        }
+    },
+    "TOKEN": {
+        "SECRET": "este-es-el-seed-desarrollo"
+    },
+    "PORT": 4000
+}
