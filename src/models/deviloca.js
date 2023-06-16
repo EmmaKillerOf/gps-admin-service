@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.DATE,
     },
     delofesi:{ 
-      allowNull: false,
+      allowNull: true,
       type: 'TIMESTAMP',
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
