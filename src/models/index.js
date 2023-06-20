@@ -11,7 +11,23 @@ let sequelize;
 if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable], config);
 } else {
-  sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, config.DB);
+  sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
+    dialect: 'mysql',
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: function (field, next) { // for reading from database
+        if (field.type === 'DATETIME') {
+          return field.string()
+        }
+          return next()
+        },
+    },
+    timezone: '-05:00',
+    query:{
+      raw: true,
+      nest: true
+    }
+  });
 }
 
 fs
