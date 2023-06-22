@@ -27,13 +27,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.DATE,
     },
     delofesi:{ 
-      allowNull: false,
-      type:DataTypes.STRING,
-      get() {
-        const date = this.getDataValue('delofesi');
-        const newDateString = new Date(date).toISOString().split('T')[0]
-        return new Date(newDateString)
-      }
+      allowNull: true,
+      type: 'TIMESTAMP',
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
     },
     delokeyw:{ 
       allowNull: false,
