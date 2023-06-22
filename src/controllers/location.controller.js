@@ -66,55 +66,30 @@ const getDevicePositions = async(req, res) => {
   try {
     const userId = req.uid;
     const { entityId } = req.params;
-    const {classifiers, carrierId, date} = req.body;    
-    const hasDate = date ? {startDate, endDate} = date : {};
-    let locations;
-    if(carrierId) {
-      const carrier = await carrierService.getCarrier({carrnuid: carrierId})
-      if(!carrier) throw "invalid carrier"; 
-      const carrierPayload = {
-        carrier: carrierId, 
-        entityId,
-        ...hasDate
-      }
-      locations = await getLocationByCarrier(carrierPayload)
-      globalResponse({resInstance: res, response: locations})
-      return
-    }
     const entityUser = await entityService.getEntityUser({entienus: entityId, userenus: userId})
-    if(!entityUser) throw "Este usuario no tiene entidades asociadas"
+    if(!entityUser) throw "Ususario no autorizado en esta entidad";
+
+    const {classifiers, plate, deviceIds = [], isAlarm, date} = req.body; 
     const devices = [];
-
-    if(entityUser.enusrole === 'ADMIN') {
-      const resultDevices = await deviceService.myDevices(entityId);
-      devices.push();
-    } else {
-      const resultDevices = await deviceService.myDevices(entityId, entityUser.enusnuid);
+    const hasDate = date ? {startDate, endDate} = date : {};
+    const classifiersDevice = (await getDevicesByClassifier(classifiers)).map(device => device.deviclde)
+    devices.push(...deviceIds);
+    devices.push(...classifiersDevice)
+    const payload = {
+      ...hasDate,
+      devices: [ ...new Set(devices) ],
+      plate,
     }
-      
-    
+    let locations;
 
+    if(!isAlarm){
+      locations = await deviceService.getDeviceLocation(payload)
+    }else {
+      locations = await deviceService.getDeviceAlerts(payload)
+    }
     
-    // if(!classifiers.length) throw "Clasificadores son requeridos"; 
-   if(classifiers.length){
-     const select = 'SELECT distinct C1.deviclde';
-     let from = '',
-         where = '',
-         join = '';
-     classifiers.map((c,index) => {
-       from+=`clasdevi AS C${index + 1}${(index + 1) < classifiers.length ? ',' : ''}`;
-       where+= `C${index + 1}.clvaclde IN (${c.toString()})${(index + 1) < classifiers.length ? ' AND ' : ''}`;
-       if(index + 2 <= classifiers.length)
-         join+= `C1.deviclde = C${index +2}.deviclde ${(index + 2) < classifiers.length ? ' AND ' : ''}`
-     })
-       
-     const clasifierQuery = `${select} from ${from} where ${where} ${classifiers.length > 1 ? 'AND' : ''} ${join}`
-     const [result, metadata] = await raw.query(clasifierQuery)
-     devices.push(...result)
-   }
-  
-    
-    locations = await deviceService.getDeviceLocation(result.map(res => res.deviclde))
+    globalResponse({resInstance: res, response: locations})
+
     // res.status(200).json({
     //   ok: true,
     //   response: locations
@@ -150,12 +125,24 @@ const getLocationByCarrier = async ({carrier, startDate, endDate, entityId}) => 
   return await deviceService.getDeviceLocation({devices: [device.devinuid], startDate, endDate})
 }
 
-const getLocationByClassifiers = (classifiers, {startDate, endDate}, userId) => {
-  
-}
 
-const getLocationByAlarm= (classifiers, {startDate, endDate}, userId) => {
-  
+const getDevicesByClassifier = async(classifiers) => {
+  const devices = [];
+  const select = 'SELECT distinct C1.deviclde';
+  let from = '',
+      where = '',
+      join = '';
+  classifiers.map((c,index) => {
+    from+=`clasdevi AS C${index + 1}${(index + 1) < classifiers.length ? ',' : ''}`;
+    where+= `C${index + 1}.clvaclde IN (${c.toString()})${(index + 1) < classifiers.length ? ' AND ' : ''}`;
+    if(index + 2 <= classifiers.length)
+      join+= `C1.deviclde = C${index +2}.deviclde ${(index + 2) < classifiers.length ? ' AND ' : ''}`
+  })
+    
+  const clasifierQuery = `${select} from ${from} where ${where} ${classifiers.length > 1 ? 'AND' : ''} ${join}`
+  const [result, metadata] = await raw.query(clasifierQuery);
+  devices.push(...result);
+  return devices;
 }
 
 
