@@ -162,7 +162,7 @@ const locationMapping = (data) => {
   const last = data[data.length -1];
   const payload = {
     devidelo: last,
-    delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    /* delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     delokeyw: data[1] === 'tracker' ? '001' : data[1],
     delotinu: getDatefromTime(data[2]),
     delotime: data[2],
@@ -226,7 +226,7 @@ const deviconeMapping = (data) => {
   const last = data[data.length -1];
   return {
     devideco: last,
-    decofesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    /* decofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     decodesc: 'New connection',
   }
 }

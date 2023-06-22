@@ -24,12 +24,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     delotinu:{ 
       allowNull: false,
-      type:DataTypes.DATE,
+      type:DataTypes.STRING,
     },
     delofesi:{ 
       allowNull: true,
       type: 'TIMESTAMP',
       defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+      get() {
+        return this.getDataValue('delofesi'); // To retrieve the current value
+      }
     },
     delokeyw:{ 
       allowNull: false,
