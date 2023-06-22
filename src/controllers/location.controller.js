@@ -28,7 +28,7 @@ const createLocation = async(req, res) => {
       deviimei: imei,
       devistat: 1
     }) 
-    if(!device) throw "Disposotivo no existe";
+    if(!device) throw "Dispositivo no existe";
     body.push(device.devinuid);
       switch (connectionType) {
         case ConexionTypeEnum.Conexion:
@@ -206,7 +206,7 @@ const alarmMapping = async (data) => {
   return {
     devideal: last,
     keywdeal: await getKeyword(),
-    dealfesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    /* dealfesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     dealstat: true,
     dealtinu:getDatefromTime(data[2]),
     dealtime: data[2],
@@ -226,7 +226,6 @@ const deviconeMapping = (data) => {
   const last = data[data.length -1];
   return {
     devideco: last,
-    /* decofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     decodesc: 'New connection',
   }
 }
@@ -237,7 +236,7 @@ const getDatefromTime = (dateTime) => {
   const month = time.substring(2,4);
   const day = time.substring(4,6);
   const getCetury = (new Date().getFullYear()).toString().substring(0,2);
-  return new Date(`${getCetury}${year}-${month}-${day}`).toISOString().split('T')[0];
+  return (new Date(`${getCetury}${year}-${month}-${day}`).toISOString().split('T')[0]).toString();
 }
 
 const calcSpeed = (speed) => {
