@@ -1,12 +1,12 @@
 {
-
     "DB": {
         "username": "root",
-        "password": "200319",
-        "database": "gps",
+        "password": "1234",
+        "database": "bdgps",
         "host": "127.0.0.1",
         "dialect": "mysql",
-        "query": { 
+        "timezone": "-05:00",
+        "query": {
             "raw": true,
             "nest": true
         }

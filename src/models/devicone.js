@@ -23,8 +23,12 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER
     },
     decofesi:{ 
-      allowNull: false,
-      type:DataTypes.STRING 
+      allowNull: true,
+      type: 'TIMESTAMP',
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+      get() {
+        return this.getDataValue('decofesi'); // To retrieve the current value
+      }
     },
     decodesc:{ 
       allowNull: false,
