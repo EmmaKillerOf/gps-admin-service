@@ -18,11 +18,9 @@ const getTravel = async (req, res) => {
             }
             latDest = e[e.length - 1].delolati;
             lonDest = e[e.length - 1].delolong;
-
-            
-
             console.log(latOrigin, lonOrigin, latDest, lonDest);
         }
+        
         res.status(200).json({
             response: arrDivisions
         })
