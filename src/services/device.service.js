@@ -81,39 +81,85 @@ const myDevices = async (entityId, entityUserId = null) => {
   return devices
 }
 
-const getDeviceLocation = async ({devices, startDate, endDate}) => {
-  console.log(devices)
+const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
+
   try {
-    const newStartDate = startDate || new Date().toISOString().split('T')[0];  
-    const newEndDate = endDate || new Date().toISOString().split('T')[0];  
+    const plateQuery = plate ? {[`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
-      delotime: { 
+      delotinu: { 
         [Op.and]:{
-          [Op.gte]:new Date('2023-01-03'),
-          // [Op.lte]: new Date('2023-05-03')
+          [Op.gte]: startDate,
+          [Op.lte]: endDate
         }
       } 
     }
-    const newDate = new Date('2023-05-31')
-    const newDate2 = new Date('2023-06-01')
+
     const deviceResult = await device.findAll({
-      // where: {
-      //   devinuid: {
-      //     [Op.in]: devices
-      //   },
-      //   // ...dateQuery
-      // },
+      where: {
+        devinuid: {
+          [Op.in]: devices
+        },
+        ...plateQuery
+      },
+      include: [
+        {
+          model: deviloca, 
+          as: 'deviloca',
+          separate : true,
+          where:{ 
+            ...dateQuery,
+          },
+          order:[['delotime', 'DESC']],
+          limit:10
+        },
+        {
+          model: carrdevi,
+          as: 'carrdevi',
+          attributes:['cadenuid'],
+          include:{
+            model: carrier,
+            as: 'carrier',
+          }
+        }, 
+      ],
+      raw : false ,
+      nest : true
+    })
+    
+    return deviceResult
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
+  console.log(devices)
+  try {
+    const dateQuery = {
+      delotinu: { 
+        [Op.and]:{
+          [Op.gte]: startDate,
+          [Op.lte]: endDate
+        }
+      } 
+    }
+
+    const deviceResult = await device.findAll({
+      where: {
+        devinuid: {
+          [Op.in]: devices
+        },
+        // ...dateQuery
+      },
       //order:[['delotime', 'DESC']],
       include: [
         {
           model: deviloca, 
           as: 'deviloca',
+          separate : true,
           where:{ 
-            delotinu: { 
-              [Op.and]:[
-                {[Op.gte]: newDate, [Op.lte]: newDate2},
-              ]
-            } 
+            ...dateQuery
           }
         },
         {
@@ -268,5 +314,6 @@ module.exports = {
   deleteClasdevi,
   createClasdevi,
   getDeviceLocation,
-  getDeviceByCarrier
+  getDeviceByCarrier,
+  getDeviceAlerts
 }
