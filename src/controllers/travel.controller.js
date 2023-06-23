@@ -7,38 +7,28 @@ const getTravel = async (req, res) => {
         const { deviceId, dateSelected } = req.params
         const travelsCalculatesOld = await travelService.getKmsCalculates(deviceId, dateSelected);
         const travels = await travelService.getTravel(deviceId, dateSelected);
-        let DistanceCalculate = 0; let DistanceTotal = 0;
+        let DistanceTotal = 0, DistanceOld = 0;
         if (travels.length > 0) {
             let latOrigin = 0; let lonOrigin = 0;
             let latDest = 0; let lonDest = 0;
-            let arrDivisions = splitArray(travels, 23);
-            for (let index = 0; index < arrDivisions.length; index++) {
-                const e = arrDivisions[index];
-                const convertWayPoint = e.map(({ delolati, delolong }) => `${delolati},${delolong}`).join('|');
-                if (index == 0) latOrigin = e[0].delolati, lonOrigin = e[0].delolong;
-                if (index != 0) {
-                    latOrigin = latDest;
-                    lonOrigin = lonDest;
-                }
-                latDest = e[e.length - 1].delolati;
-                lonDest = e[e.length - 1].delolong;
-                const kms = await travelService.getKmsTravel(latOrigin, lonOrigin, latDest, lonDest, convertWayPoint);
-                const routes = kms.data.routes;
-                if (routes.length > 0) {
-                    const legs = routes[0].legs;
-                    for (let i = 0; i < legs.length - 1; i++) {
-                        DistanceCalculate += legs[i].distance.value;
-                    }
-                }
-            }
-            payload = kmMapping([deviceId, travels[0].delonuid, travels[travels.length - 1].delonuid, dateSelected, DistanceCalculate]);
+            for (let i = 0; i < travels.length - 1; i++) {
+                const punto1 = travels[i];
+                const punto2 = travels[i + 1];
+                DistanceTotal += haversineDistance(
+                  punto1.delolati,
+                  punto1.delolong,
+                  punto2.delolati,
+                  punto2.delolong
+                );
+              }
+            payload = kmMapping([deviceId, travels[0].delonuid, travels[travels.length - 1].delonuid, dateSelected, DistanceTotal]);
             await travelService.createKm(payload);
             await devilocaService.updateCalcKm(deviceId, travels[0].delonuid, travels[travels.length - 1].delonuid);
         }
         if (travelsCalculatesOld.length > 0) {
-            DistanceTotal = travelsCalculatesOld.reduce((total, obj) => total + obj.kmcapt, 0);
+            DistanceOld = travelsCalculatesOld.reduce((total, obj) => total + obj.kmcapt, 0);
         }
-        DistanceTotal += DistanceCalculate;
+        DistanceTotal += DistanceOld;
         res.status(200).json({
             response: DistanceTotal
         })
@@ -69,6 +59,25 @@ const kmMapping = (data) => {
     }
     return payload
 }
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radio de la Tierra en kilómetros
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+  
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  
+    const distance = R * c;
+    return distance;
+  }
+  
+  function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+  }
 
 module.exports = {
     getTravel
