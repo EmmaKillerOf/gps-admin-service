@@ -9,7 +9,10 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(model) {}
+    static associate(model) {
+      this.hasMany(model.kmdevi, {as: 'kmdeviInicio', foreignKey: 'kmdeloini'});
+      this.hasMany(model.kmdevi, {as: 'kmdeviFin', foreignKey: 'kmdelofin'});
+    }
   }
   deviloca.init({
     delonuid:{ 
@@ -97,6 +100,10 @@ module.exports = (sequelize, DataTypes) => {
     delodat5:{ 
       type:DataTypes.STRING 
     },
+    delocalcu:{
+      allowNull: false,
+      type:DataTypes.BOOLEAN 
+    }
   }, {
     sequelize,
     timestamps: false,

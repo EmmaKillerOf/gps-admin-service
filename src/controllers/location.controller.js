@@ -182,6 +182,7 @@ const locationMapping = (data) => {
     delodat3: data[16],
     delodat4: data[17],
     delodat5: data[18],
+    delocalcu: false
   }
   return payload
 }

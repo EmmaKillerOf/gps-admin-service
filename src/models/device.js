@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       this.hasOne(model.carrdevi, {as: 'carrdevi', foreignKey: 'devicade'});
       this.hasMany(model.clasdevi, {as: 'clasdevi', foreignKey: 'deviclde'});
       this.hasMany(model.deviloca, {as: 'deviloca', foreignKey: 'devidelo'});
+      this.hasMany(model.kmdevi, {as: 'kmdevi', foreignKey: 'kmdevice'});
     }
   }
   device.init({

@@ -9,7 +9,7 @@ const { getTravel } = require('../controllers/travel.controller')
 //ENTITY
 // ===============================
 
-app.get('/:vehicleId', verificaToken, getTravel);
+app.get('/:deviceId/:dateSelected', verificaToken, getTravel);
 
 /* app.post('/', verificaToken, createEntity);
 
