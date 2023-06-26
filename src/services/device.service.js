@@ -83,7 +83,7 @@ const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
   try {
     const plateQuery = plate ? {[`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
-      delotinu: { 
+      delotinude: { 
         [Op.and]:{
           [Op.gte]: startDate,
           [Op.lte]: endDate
@@ -134,7 +134,7 @@ const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
   console.log(devices)
   try {
     const dateQuery = {
-      delotinu: { 
+      delotinude: { 
         [Op.and]:{
           [Op.gte]: startDate,
           [Op.lte]: endDate
@@ -152,8 +152,8 @@ const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
       //order:[['delotime', 'DESC']],
       include: [
         {
-          model: deviloca, 
-          as: 'deviloca',
+          model: devialar, 
+          as: 'devialar',
           separate : true,
           where:{ 
             ...dateQuery

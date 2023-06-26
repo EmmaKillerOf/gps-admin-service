@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
     static associate(model) {
       this.hasMany(model.kmdevi, {as: 'kmdeviInicio', foreignKey: 'kmdeloini'});
       this.hasMany(model.kmdevi, {as: 'kmdeviFin', foreignKey: 'kmdelofin'});
+      this.hasMany(model.dehiskm, {as: 'dehiskm', foreignKey: 'dehideloca'});
     }
   }
   deviloca.init({
@@ -103,6 +104,10 @@ module.exports = (sequelize, DataTypes) => {
     delocalcu:{
       allowNull: false,
       type:DataTypes.BOOLEAN 
+    },
+    delotinude:{
+      allowNull: false,
+      type:DataTypes.DATE        
     }
   }, {
     sequelize,

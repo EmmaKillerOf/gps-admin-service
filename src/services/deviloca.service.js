@@ -20,7 +20,23 @@ const updateCalcKm = async (deviceId, init, fin) => {
   );
 }
 
+const getRowsUpdate = async (deviceId, init, fin) => {
+  return await deviloca.findAll(
+    {
+      where: {
+        delocalcu: true,
+        delonuid: {
+          [Op.gte]: init,
+          [Op.lte]: fin   
+        },
+        devidelo: deviceId
+      }
+    }
+  );
+}
+
 module.exports = {
   createLocation,
-  updateCalcKm
+  updateCalcKm,
+  getRowsUpdate
 }

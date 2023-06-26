@@ -33,7 +33,6 @@ const getKmsTravel = async (latOrigin, lonOrigin, latDest, lonDest, waypoints) =
 }
 
 const getKmsCalculates = async (deviceId, dateSelected) => {
-  console.log(dateSelected);
   const kmsTemp = await kmdevi.findAll({
     where: {
       kmdevice: deviceId,

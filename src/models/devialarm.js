@@ -72,6 +72,10 @@ module.exports = (sequelize, DataTypes) => {
     dealspee:{ 
       allowNull: true,
       type:DataTypes.STRING 
+    },
+    delotinude:{
+      allowNull: false,
+      type:DataTypes.DATE        
     }
   }, {
     sequelize,
