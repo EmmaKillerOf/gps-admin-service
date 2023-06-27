@@ -20,7 +20,7 @@ if (config.use_env_variable) {
           return next()
         },
     },
-    timezone: 'America/Bogota',
+    timezone: '-05:00',
     query:{
       raw: true,
       nest: true
@@ -38,7 +38,7 @@ if (config.use_env_variable) {
           return next()
         },
     },
-    timezone: 'America/Bogota',
+    timezone: '-05:00',
     query:{
       raw: true,
       nest: true

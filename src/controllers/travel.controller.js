@@ -54,6 +54,38 @@ const getTravel = async (req, res) => {
     }
   }
 
+  const getTravelTemp = async (req, res) => {
+    try {
+      const { deviceId, dateInit, dateFinal } = req.params;
+      const travels = await travelService.getTravelTemp(deviceId, dateInit, dateFinal);
+      
+      let DistanceTotal = 0;
+      
+      if (travels.length > 0) {
+        for (let i = 0; i < travels.length - 1; i++) {
+          const punto1 = travels[i];
+          const punto2 = travels[i + 1];
+          DistanceTotal += haversineDistance(
+            punto1.delolati,
+            punto1.delolong,
+            punto2.delolati,
+            punto2.delolong
+          );
+        }
+      }
+      
+      DistanceTotal = Math.ceil(DistanceTotal);
+      res.status(200).json({
+        response: DistanceTotal
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({
+        error
+      });
+    }
+  }
+
 /* function splitArray(array, chunkSize) {
     const result = [];
     for (let i = 0; i < array.length; i += chunkSize) {
@@ -93,6 +125,9 @@ function haversineDistance(lat1, lon1, lat2, lon2) {
     return degrees * (Math.PI / 180);
   }
 
+
+
 module.exports = {
-    getTravel
+    getTravel,
+    getTravelTemp
 }

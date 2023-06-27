@@ -13,6 +13,12 @@ const getTravel = async (deviceId, dateSelected) => {
   return result
 }
 
+const getTravelTemp = async (deviceId, dateInit, dateFinal) => {
+  const travels = `call get_positions_vehicle_temp(${deviceId}, '${dateInit}', '${dateFinal}')`
+  const result = await raw.query(travels)
+  return result
+}
+
 const getKmsTravel = async (latOrigin, lonOrigin, latDest, lonDest, waypoints) => {
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
@@ -52,5 +58,6 @@ module.exports = {
   getTravel,
   getKmsTravel,
   getKmsCalculates,
+  getTravelTemp,
   createKm
 }
