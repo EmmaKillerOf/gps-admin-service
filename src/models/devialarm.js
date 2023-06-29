@@ -27,8 +27,12 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.INTEGER
     },
     dealfesi:{ 
-      allowNull: false,
-      type:DataTypes.STRING 
+      allowNull: true,
+      type: 'TIMESTAMP',
+      defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+      get() {
+        return this.getDataValue('dealfesi'); // To retrieve the current value
+      }
     },
     dealstat:{ 
       allowNull: false,
@@ -36,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     dealtinu:{ 
       allowNull: false,
-      type:DataTypes.DATE,
+      type:DataTypes.STRING,
     },
     dealtime:{ 
       allowNull: false,
@@ -68,6 +72,10 @@ module.exports = (sequelize, DataTypes) => {
     dealspee:{ 
       allowNull: true,
       type:DataTypes.STRING 
+    },
+    delotinude:{
+      allowNull: false,
+      type:DataTypes.DATE        
     }
   }, {
     sequelize,

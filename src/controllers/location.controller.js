@@ -12,6 +12,7 @@ const { getLocationPoint } = require('../helpers/helpers')
 const { date } = require('joi');
 const config = require('../config/environment')
 const { Sequelize } = require('sequelize');
+const moment = require('moment');
 const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
   host: config.DB.host,
   dialect: config.DB.dialect
@@ -28,7 +29,7 @@ const createLocation = async(req, res) => {
       deviimei: imei,
       devistat: 1
     }) 
-    if(!device) throw "Disposotivo no existe";
+    if(!device) throw "Dispositivo no existe";
     body.push(device.devinuid);
       switch (connectionType) {
         case ConexionTypeEnum.Conexion:
@@ -67,7 +68,7 @@ const getDevicePositions = async(req, res) => {
     const userId = req.uid;
     const { entityId } = req.params;
     const entityUser = await entityService.getEntityUser({entienus: entityId, userenus: userId})
-    if(!entityUser) throw "Ususario no autorizado en esta entidad";
+    if(!entityUser) throw "Usuario no autorizado en esta entidad";
 
     const {classifiers, plate, deviceIds = [], isAlarm, date} = req.body; 
     const devices = [];
@@ -162,7 +163,7 @@ const locationMapping = (data) => {
   const last = data[data.length -1];
   const payload = {
     devidelo: last,
-    delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    /* delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     delokeyw: data[1] === 'tracker' ? '001' : data[1],
     delotinu: getDatefromTime(data[2]),
     delotime: data[2],
@@ -182,6 +183,8 @@ const locationMapping = (data) => {
     delodat3: data[16],
     delodat4: data[17],
     delodat5: data[18],
+    delocalcu: false,
+    delotinude: getDatefromTimeAndHours(data[2]),
   }
   return payload
 }
@@ -206,7 +209,7 @@ const alarmMapping = async (data) => {
   return {
     devideal: last,
     keywdeal: await getKeyword(),
-    dealfesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
+    /* dealfesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     dealstat: true,
     dealtinu:getDatefromTime(data[2]),
     dealtime: data[2],
@@ -217,6 +220,7 @@ const alarmMapping = async (data) => {
     deallong: getLocationPoint(data[9],data[10]),
     dealloor: data[10],
     dealspee: calcSpeed(data[11]),
+    delotinude: getDatefromTimeAndHours(data[2])
   }
 }
 
@@ -226,7 +230,6 @@ const deviconeMapping = (data) => {
   const last = data[data.length -1];
   return {
     devideco: last,
-    decofesi: new Date().toISOString().slice(0, 19).replace('T', ' '),
     decodesc: 'New connection',
   }
 }
@@ -237,7 +240,21 @@ const getDatefromTime = (dateTime) => {
   const month = time.substring(2,4);
   const day = time.substring(4,6);
   const getCetury = (new Date().getFullYear()).toString().substring(0,2);
-  return new Date(`${getCetury}${year}-${month}-${day}`).toISOString().split('T')[0];
+  return (new Date(`${getCetury}${year}-${month}-${day}`).toISOString().split('T')[0]).toString();
+}
+
+const getDatefromTimeAndHours = (dateTime) => {
+  const time = dateTime;
+  const year = time.substring(0, 2);
+  const month = time.substring(2, 4);
+  const day = time.substring(4, 6);
+  const hour = time.substring(6, 8);
+  const minutes = time.substring(8, 10);
+  const seconds = time.substring(10, 12);
+  const getCetury = (new Date().getFullYear()).toString().substring(0,2);
+  const dateStr = `${getCetury}${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
+  const date = moment.utc(dateStr).utcOffset('-05:00', true);
+  return date.toISOString();
 }
 
 const calcSpeed = (speed) => {

@@ -19,13 +19,9 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       ...availableQuery
     },
     order:[
-      'devinuid', 'DESC',
-    ],
-    order: [
-      // [  { model: deviloca, as: 'deviloca' }, 'delotime', 'DESC' ]
+      ['devinuid', 'DESC'],
     ],
     include:[
-      
       {
         model: carrdevi,
         as: 'carrdevi',
@@ -47,6 +43,7 @@ const getDevices = async (entityId, available, entityUserId = null) => {
         model: deviloca,
         as: 'deviloca',
         separate : true, // <--- Run separate query
+        order: [['delotinu', 'DESC'],['delotime', 'DESC']],
         limit: 1
       },
       ...includes,
@@ -110,7 +107,6 @@ const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
             ...dateQuery,
           },
           order:[['delotime', 'DESC']],
-          limit:10
         },
         {
           model: carrdevi,
@@ -155,8 +151,8 @@ const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
       //order:[['delotime', 'DESC']],
       include: [
         {
-          model: deviloca, 
-          as: 'deviloca',
+          model: devialar, 
+          as: 'devialar',
           separate : true,
           where:{ 
             ...dateQuery
