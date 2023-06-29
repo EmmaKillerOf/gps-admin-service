@@ -73,11 +73,11 @@ const getDevicePositions = async(req, res) => {
     const devices = [];
     const hasDate = date ? {startDate, endDate} = date : {};
     const classifiersDevice = (await getDevicesByClassifier(classifiers)).map(device => device.deviclde)
-    devices.push(...deviceIds);
-    devices.push(...classifiersDevice)
+    devices.push(...deviceIds, ...classifiersDevice);
+    const hasDevices = devices.length ? { devices: [ ...new Set(devices) ] } : {}
     const payload = {
       ...hasDate,
-      devices: [ ...new Set(devices) ],
+      ...hasDevices,
       plate,
     }
     let locations;
