@@ -24,7 +24,6 @@ const createLocation = async(req, res) => {
     let payload = {};
     const { connectionType, imei } = req.query;
 
-    
     const device = await deviceService.getDevice({
       deviimei: imei,
       devistat: 1
@@ -44,11 +43,9 @@ const createLocation = async(req, res) => {
           payload =  locationMapping(body);
           await devilocaService.createLocation(payload);
           break;   
-      
         default:
           break;
       }
-
       res.status(200).json({
         ok: true,
         response: {}
@@ -258,7 +255,6 @@ const getDatefromTimeAndHours = (dateTime) => {
 }
 
 const calcSpeed = (speed) => {
-  console.log(speed)
   return speed > 0 ? parseInt(speed, 10) * 1.85 : 0
 };
 

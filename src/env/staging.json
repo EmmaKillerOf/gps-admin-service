@@ -9,7 +9,8 @@
         "query": {
             "raw": true,
             "nest": true
-        }
+        },
+        "logging": false
     },
     "TOKEN": {
         "SECRET": "este-es-el-seed-desarrollo"

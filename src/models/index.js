@@ -24,7 +24,8 @@ if (config.use_env_variable) {
     query:{
       raw: true,
       nest: true
-    }
+    },
+    logging: false
   });
 } else {
   sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
@@ -42,7 +43,8 @@ if (config.use_env_variable) {
     query:{
       raw: true,
       nest: true
-    }
+    },
+    logging: false
   });
 }
 
