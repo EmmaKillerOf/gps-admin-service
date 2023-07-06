@@ -76,7 +76,13 @@ module.exports = (sequelize, DataTypes) => {
     delotinude:{
       allowNull: false,
       type:DataTypes.DATE        
-    }
+    },
+    delodire:{ 
+      type:DataTypes.STRING 
+    },
+    delobarri:{ 
+      type:DataTypes.STRING 
+    },
   }, {
     sequelize,
     timestamps: false,

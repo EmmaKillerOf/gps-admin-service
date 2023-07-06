@@ -18,7 +18,52 @@ const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.pass
   dialect: config.DB.dialect
 })
 
-const createLocation = async(req, res) => {
+const createLocationsFromRedis = async (req, res) => {
+  try {
+    let body = req.body;
+    let dataRedis = body.map(item => JSON.parse(item.replace(/^"(.*)"$/, '$1')));
+    for (let i = 0; i < dataRedis.length; i++) {
+      let objeto = dataRedis[i][0];
+      let info = objeto.info;
+      const device = await deviceService.getDevice({
+        deviimei: objeto.imei,
+        devistat: 1
+      })
+      if (device) {
+        info.push(device.devinuid);
+        switch (objeto.type) {
+          case ConexionTypeEnum.Conexion:
+            payload = deviconeMapping(info);
+            await deviconeService.createConexion(payload);
+            break;
+          case ConexionTypeEnum.Alarm:
+            payload = await alarmMapping(info)
+            await devialarmService.createAlarm(payload);
+            break;
+          case ConexionTypeEnum.Location:
+            payload = locationMapping(info);
+            await devilocaService.createLocation(payload);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    res.status(200).json({
+      ok: true,
+      response: {}
+    })
+
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      error
+    })
+  }
+}
+
+const createLocation = async (req, res) => {
   try {
     let body = req.body;
     let payload = {};
@@ -27,52 +72,51 @@ const createLocation = async(req, res) => {
     const device = await deviceService.getDevice({
       deviimei: imei,
       devistat: 1
-    }) 
-    if(!device) throw "Dispositivo no existe";
+    })
+    if (!device) throw "Dispositivo no existe";
     body.push(device.devinuid);
-      switch (connectionType) {
-        case ConexionTypeEnum.Conexion:
-          payload = deviconeMapping(body);
-          await deviconeService.createConexion(payload);
-          break;
-        case ConexionTypeEnum.Alarm:
-          payload = await alarmMapping(body)
-          await devialarmService.createAlarm(payload);
-          break;  
-        case ConexionTypeEnum.Location:
-          payload =  locationMapping(body);
-          await devilocaService.createLocation(payload);
-          break;   
-        default:
-          break;
-      }
-      res.status(200).json({
-        ok: true,
-        response: {}
-    }) 
-    
+    switch (connectionType) {
+      case ConexionTypeEnum.Conexion:
+        payload = deviconeMapping(body);
+        await deviconeService.createConexion(payload);
+        break;
+      case ConexionTypeEnum.Alarm:
+        payload = await alarmMapping(body)
+        await devialarmService.createAlarm(payload);
+        break;
+      case ConexionTypeEnum.Location:
+        payload = locationMapping(body);
+        await devilocaService.createLocation(payload);
+        break;
+      default:
+        break;
+    }
+    res.status(200).json({
+      ok: true,
+      response: {}
+    })
+
   } catch (error) {
     console.log(error)
-      res.status(400).json({
-          error
-      }) 
-    
+    res.status(400).json({
+      error
+    })
   }
 }
 
-const getDevicePositions = async(req, res) => {
+const getDevicePositions = async (req, res) => {
   try {
     const userId = req.uid;
     const { entityId } = req.params;
-    const entityUser = await entityService.getEntityUser({entienus: entityId, userenus: userId})
-    if(!entityUser) throw "Usuario no autorizado en esta entidad";
+    const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId })
+    if (!entityUser) throw "Usuario no autorizado en esta entidad";
 
-    const {classifiers, plate, deviceIds = [], isAlarm, date} = req.body; 
+    const { classifiers, plate, deviceIds = [], isAlarm, date } = req.body;
     const devices = [];
-    const hasDate = date ? {startDate, endDate} = date : {};
+    const hasDate = date ? { startDate, endDate } = date : {};
     const classifiersDevice = (await getDevicesByClassifier(classifiers)).map(device => device.deviclde)
     devices.push(...deviceIds, ...classifiersDevice);
-    const hasDevices = devices.length ? { devices: [ ...new Set(devices) ] } : {}
+    const hasDevices = devices.length ? { devices: [...new Set(devices)] } : {}
     const payload = {
       ...hasDate,
       ...hasDevices,
@@ -80,63 +124,63 @@ const getDevicePositions = async(req, res) => {
     }
     let locations;
 
-    if(!isAlarm){
+    if (!isAlarm) {
       locations = await deviceService.getDeviceLocation(payload)
-    }else {
+    } else {
       locations = await deviceService.getDeviceAlerts(payload)
     }
-    
-    globalResponse({resInstance: res, response: locations})
+
+    globalResponse({ resInstance: res, response: locations })
 
     // res.status(200).json({
     //   ok: true,
     //   response: locations
     // }) 
-   
+
   } catch (error) {
     console.log(error)
-      res.status(400).json({
-          error
-      }) 
-    
+    res.status(400).json({
+      error
+    })
+
   }
-  
+
 }
 
-const globalResponse = async ({resInstance ,status = 200, response, hasError = false}) => {
-  const payload = !hasError ? 
+const globalResponse = async ({ resInstance, status = 200, response, hasError = false }) => {
+  const payload = !hasError ?
     {
       ok: true,
       response
-    }:
+    } :
     {
       error: response
     }
   resInstance.status(status).json({
     ...payload
-  }) 
+  })
 }
 
-const getLocationByCarrier = async ({carrier, startDate, endDate, entityId}) => {
-  const device = await deviceService.getDeviceByCarrier(entityId, carrier ) 
+const getLocationByCarrier = async ({ carrier, startDate, endDate, entityId }) => {
+  const device = await deviceService.getDeviceByCarrier(entityId, carrier)
   console.log(device.devinuid)
-  return await deviceService.getDeviceLocation({devices: [device.devinuid], startDate, endDate})
+  return await deviceService.getDeviceLocation({ devices: [device.devinuid], startDate, endDate })
 }
 
 
-const getDevicesByClassifier = async(classifiers) => {
+const getDevicesByClassifier = async (classifiers) => {
   const devices = [];
   const select = 'SELECT distinct C1.deviclde';
   let from = '',
-      where = '',
-      join = '';
-  classifiers.map((c,index) => {
-    from+=`clasdevi AS C${index + 1}${(index + 1) < classifiers.length ? ',' : ''}`;
-    where+= `C${index + 1}.clvaclde IN (${c.toString()})${(index + 1) < classifiers.length ? ' AND ' : ''}`;
-    if(index + 2 <= classifiers.length)
-      join+= `C1.deviclde = C${index +2}.deviclde ${(index + 2) < classifiers.length ? ' AND ' : ''}`
+    where = '',
+    join = '';
+  classifiers.map((c, index) => {
+    from += `clasdevi AS C${index + 1}${(index + 1) < classifiers.length ? ',' : ''}`;
+    where += `C${index + 1}.clvaclde IN (${c.toString()})${(index + 1) < classifiers.length ? ' AND ' : ''}`;
+    if (index + 2 <= classifiers.length)
+      join += `C1.deviclde = C${index + 2}.deviclde ${(index + 2) < classifiers.length ? ' AND ' : ''}`
   })
-    
+
   const clasifierQuery = `${select} from ${from} where ${where} ${classifiers.length > 1 ? 'AND' : ''} ${join}`
   const [result, metadata] = await raw.query(clasifierQuery);
   devices.push(...result);
@@ -147,17 +191,17 @@ const getDevicesByClassifier = async(classifiers) => {
 const locationMapping = (data) => {
   //** Example data */
   // data: [
-    // "imei:868166051431047", "001",
-    // "230319062456",         "",
-    // "F",                    "112456.000",
-    // "A",                    "0838.07803",
-    // "N",                    "07350.64243",
-    // "W",                    "37.28",
-    // "343.54",               "",
-    // "1",                    "1",
-    // "0.00%",                ""
+  // "imei:868166051431047", "001",
+  // "230319062456",         "",
+  // "F",                    "112456.000",
+  // "A",                    "0838.07803",
+  // "N",                    "07350.64243",
+  // "W",                    "37.28",
+  // "343.54",               "",
+  // "1",                    "1",
+  // "0.00%",                ""
   // ]
-  const last = data[data.length -1];
+  const last = data[data.length - 1];
   const payload = {
     devidelo: last,
     /* delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
@@ -168,9 +212,9 @@ const locationMapping = (data) => {
     delosign: data[4],
     delohour: data[5],
     delosigc: data[6],
-    delolati: getLocationPoint(data[7],data[8]),
+    delolati: getLocationPoint(data[7], data[8]),
     delolaor: data[8],
-    delolong: getLocationPoint(data[9],data[10]),
+    delolong: getLocationPoint(data[9], data[10]),
     deloloor: data[10],
     delospee: calcSpeed(data[11]),
     delodat1: data[12],
@@ -182,6 +226,8 @@ const locationMapping = (data) => {
     delodat5: data[18],
     delocalcu: false,
     delotinude: getDatefromTimeAndHours(data[2]),
+    delodire: '',
+    delobarri: ''
   }
   return payload
 }
@@ -197,9 +243,9 @@ const alarmMapping = async (data) => {
   //     "W",           "100.00",
   //     "0"
   // ]
-  const last = data[data.length -1];
+  const last = data[data.length - 1];
   const getKeyword = async () => {
-    const key = await keywordService.getKeyword({keywcodi: data[1]})
+    const key = await keywordService.getKeyword({ keywcodi: data[1] })
     return key ? key.keywnuid : null
   }
 
@@ -208,23 +254,25 @@ const alarmMapping = async (data) => {
     keywdeal: await getKeyword(),
     /* dealfesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
     dealstat: true,
-    dealtinu:getDatefromTime(data[2]),
+    dealtinu: getDatefromTime(data[2]),
     dealtime: data[2],
     dealsign: data[4],
     dealhour: data[5],
-    deallati: getLocationPoint(data[7],data[8]),
+    deallati: getLocationPoint(data[7], data[8]),
     deallaor: data[8],
-    deallong: getLocationPoint(data[9],data[10]),
+    deallong: getLocationPoint(data[9], data[10]),
     dealloor: data[10],
     dealspee: calcSpeed(data[11]),
-    delotinude: getDatefromTimeAndHours(data[2])
+    delotinude: getDatefromTimeAndHours(data[2]),
+    delodire: '',
+    delobarri: ''
   }
 }
 
 const deviconeMapping = (data) => {
   //** Example data */
   // [ "##", "imei:787878", "A" ]
-  const last = data[data.length -1];
+  const last = data[data.length - 1];
   return {
     devideco: last,
     decodesc: 'New connection',
@@ -233,10 +281,10 @@ const deviconeMapping = (data) => {
 
 const getDatefromTime = (dateTime) => {
   const time = dateTime;
-  const year = time.substring(0,2);
-  const month = time.substring(2,4);
-  const day = time.substring(4,6);
-  const getCetury = (new Date().getFullYear()).toString().substring(0,2);
+  const year = time.substring(0, 2);
+  const month = time.substring(2, 4);
+  const day = time.substring(4, 6);
+  const getCetury = (new Date().getFullYear()).toString().substring(0, 2);
   return (new Date(`${getCetury}${year}-${month}-${day}`).toISOString().split('T')[0]).toString();
 }
 
@@ -248,10 +296,12 @@ const getDatefromTimeAndHours = (dateTime) => {
   const hour = time.substring(6, 8);
   const minutes = time.substring(8, 10);
   const seconds = time.substring(10, 12);
-  const getCetury = (new Date().getFullYear()).toString().substring(0,2);
+  const getCetury = (new Date().getFullYear()).toString().substring(0, 2);
   const dateStr = `${getCetury}${year}-${month}-${day} ${hour}:${minutes}:${seconds}`;
-  const date = moment.utc(dateStr).utcOffset('-05:00', true);
-  return date.toISOString();
+  const date = new Date(dateStr);
+  date.setUTCHours(date.getUTCHours());
+  const isoString = date.toISOString();
+  return isoString;
 }
 
 const calcSpeed = (speed) => {
@@ -260,5 +310,6 @@ const calcSpeed = (speed) => {
 
 module.exports = {
   createLocation,
+  createLocationsFromRedis,
   getDevicePositions
 }

@@ -1,5 +1,5 @@
 const { devialar } = require('../models');
-
+const axios = require('axios');
 const createAlarm = async (payload) => {
   const lastRecord = await devialar.findAll({
     where: {
@@ -19,7 +19,12 @@ const createAlarm = async (payload) => {
   });
 
   if (lastRecord.length < 2 && !valid) {
-    return await devialar.create({...payload})
+    setTimeout(async () => {
+      const getAdress = await getDirections(payload.deallati, payload.deallong);
+      payload.delodire = getAdress[0];
+      payload.delobarri = getAdress[1];
+      return await devialar.create({...payload})
+    }, 1500);
   } else if (lastRecord.length >= 2) {
     return await devialar.update(
       {
@@ -31,6 +36,23 @@ const createAlarm = async (payload) => {
         where: { devideal: lastRecord[0].devideal }
       }
     );
+  }
+}
+
+const getDirections = async (latitude, longitude) => {
+  let address = ' ';
+  let suburb = ' ';
+  try {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+    const data = response.data;
+    if (data) {
+      address = data.display_name;
+      suburb = data.address.suburb;
+    }
+    return [address, suburb];
+  } catch (error) {
+    console.log('Error en la solicitud de geocodificación inversa:', error);
+    return [address, suburb];
   }
 }
 
