@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const { verificaToken } = require('../middlewares/autenticacion');
-const { getTravel, getTravelTemp } = require('../controllers/travel.controller')
+const { getTravel, getTravelTemp, workCalculateAllDevices } = require('../controllers/travel.controller')
 
 
 
@@ -12,6 +12,8 @@ const { getTravel, getTravelTemp } = require('../controllers/travel.controller')
 app.get('/:deviceId/:dateSelected', verificaToken, getTravel);
 
 app.get('/temp/:deviceId/:dateInit/:dateFinal', verificaToken, getTravelTemp);
+
+app.get('/work/', verificaToken, workCalculateAllDevices);
 
 /* app.post('/', verificaToken, createEntity);
 
