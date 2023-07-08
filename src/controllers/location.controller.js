@@ -170,20 +170,24 @@ const getLocationByCarrier = async ({ carrier, startDate, endDate, entityId }) =
 
 const getDevicesByClassifier = async (classifiers) => {
   const devices = [];
-  const select = 'SELECT distinct C1.deviclde';
-  let from = '',
-    where = '',
-    join = '';
-  classifiers.map((c, index) => {
-    from += `clasdevi AS C${index + 1}${(index + 1) < classifiers.length ? ',' : ''}`;
-    where += `C${index + 1}.clvaclde IN (${c.toString()})${(index + 1) < classifiers.length ? ' AND ' : ''}`;
-    if (index + 2 <= classifiers.length)
-      join += `C1.deviclde = C${index + 2}.deviclde ${(index + 2) < classifiers.length ? ' AND ' : ''}`
-  })
-
-  const clasifierQuery = `${select} from ${from} where ${where} ${classifiers.length > 1 ? 'AND' : ''} ${join}`
-  const [result, metadata] = await raw.query(clasifierQuery);
-  devices.push(...result);
+  const countClassifiers = classifiers.length;
+  if(countClassifiers > 0 && classifiers[0] != -1){
+    const select = 'SELECT distinct C1.deviclde';
+    let from = '',
+        where = '',
+        join = '';
+        console.log(countClassifiers)
+    classifiers.map((classifier,index) => {
+      from+=`clasdevi AS C${index + 1}${(index + 1) < countClassifiers ? ',' : ''}`;
+      where+= `C${index + 1}.clvaclde IN (${classifier.toString()})${(index + 1) < countClassifiers ? ' AND ' : ''}`;
+      if(index + 2 <= countClassifiers)
+        join+= `C1.deviclde = C${index +2}.deviclde ${(index + 2) < countClassifiers ? ' AND ' : ''}`
+    })
+      
+    const clasifierQuery = `${select} from ${from} where ${where} ${countClassifiers > 1 ? 'AND' : ''} ${join}`
+    const [result, metadata] = await raw.query(clasifierQuery);
+    devices.push(...result);
+  }
   return devices;
 }
 

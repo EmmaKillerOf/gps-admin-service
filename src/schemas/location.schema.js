@@ -7,8 +7,8 @@ const GetLocationsSchema = Joi.object({
     deviceIds: Joi.array().items(Joi.number()),
     isAlarm: Joi.boolean(),
     date: Joi.object({
-      startDate: Joi.string().required(),
-      endDate: Joi.string().required(),
+      startDate: Joi.string().optional(),
+      endDate: Joi.string().optional(),
     }),
   }),
   params: Joi.object({
