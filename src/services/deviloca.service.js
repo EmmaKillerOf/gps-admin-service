@@ -25,6 +25,7 @@ const createLocation = async (payload) => {
       const getAdress = await getDirections(payload.delolati, payload.delolong);
       payload.delodire = getAdress[0];
       payload.delobarri = getAdress[1];
+      console.log(getAdress[1] + " BARRIO");
       return await deviloca.create(payload);
     }, 1500);
   } else if (lastRecord.length >= 2) {
