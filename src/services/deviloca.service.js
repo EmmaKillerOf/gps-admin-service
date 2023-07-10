@@ -54,6 +54,28 @@ const createLocation = async (payload) => {
   });
 
 
+  if (lastRecord.length < 2) {
+    await new Promise((resolve) => {
+      setTimeout(async () => {
+        const getAdress = await getDirections(payload.delolati, payload.delolong);
+        payload.delodire = getAdress[0];
+        payload.delobarri = getAdress[1];
+        resolve();
+      }, 1100);
+    });
+    await deviloca.create(payload);
+  } else if (lastRecord.length >= 2) {
+    return await deviloca.update(
+      {
+        delotime: payload.delotime,
+        delotinude: payload.delotinude,
+        delotinu: payload.delotinu
+      },
+      {
+        where: { delonuid: lastRecord[0].delonuid }
+      }
+    );
+  }
 }
 
 const updateCalcKm = async (deviceId, init, fin) => {
