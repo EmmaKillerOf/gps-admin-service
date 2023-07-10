@@ -21,13 +21,16 @@ const createLocation = async (payload) => {
   });
 
   if (lastRecord.length < 2 && !valid) {
-    setTimeout(async () => {
-      const getAdress = await getDirections(payload.delolati, payload.delolong);
-      payload.delodire = getAdress[0];
-      payload.delobarri = getAdress[1];
-      console.log(getAdress[1] + " BARRIO");
-      return await deviloca.create(payload);
-    }, 1500);
+    await new Promise((resolve) => {
+      setTimeout(async () => {
+        const getAdress = await getDirections(payload.delolati, payload.delolong);
+        payload.delodire = getAdress[0];
+        payload.delobarri = getAdress[1];
+        console.log(getAdress[1] + " BARRIO");
+        await deviloca.create(payload);
+        resolve();
+      }, 1100);
+    });
   } else if (lastRecord.length >= 2) {
     return await deviloca.update(
       {
@@ -40,7 +43,6 @@ const createLocation = async (payload) => {
       }
     );
   }
-  
 }
 
 const updateCalcKm = async (deviceId, init, fin) => {
