@@ -28,17 +28,12 @@ const createLocation = async (payload) => {
   }
 
   if (lastRecord.length < 2) {
-    await new Promise((resolve) => {
-      setTimeout(async () => {
         const getAdress = await getDirections(payload.delolati, payload.delolong);
         payload.delodire = getAdress[0];
         payload.delobarri = getAdress[1];
         console.log(getAdress[1] + " BARRIO");
         await deviloca.create(payload);
         console.log("Creada");
-        resolve();
-      }, 1100);
-    });
   } else if (lastRecord.length >= 2) {
     return await deviloca.update(
       {
