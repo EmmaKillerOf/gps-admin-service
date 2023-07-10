@@ -3,6 +3,14 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 
 const createLocation = async (payload) => {
+
+  const valid = await deviloca.findAll({
+    where: {
+      devidelo: payload.devidelo,
+      delotime: payload.delotime
+    }
+  });
+  console.log(valid);
   const lastRecord = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
@@ -11,13 +19,6 @@ const createLocation = async (payload) => {
     },
     order: [['delonuid', 'DESC']],
     limit: 2
-  });
-
-  const valid = await deviloca.findAll({
-    where: {
-      devidelo: payload.devidelo,
-      delotime: payload.delotime
-    }
   });
 
   if (lastRecord.length < 2 && valid.length == 0) {
