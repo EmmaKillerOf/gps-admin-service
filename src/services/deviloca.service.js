@@ -3,6 +3,9 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 
 const createLocation = async (payload) => {
+
+  console.log(payload);
+  console.log("--------------------------\n");
   const lastRecord = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
