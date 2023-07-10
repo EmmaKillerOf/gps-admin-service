@@ -3,7 +3,6 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 
 const createLocation = async (payload) => {
-
   console.log(payload);
   console.log("--------------------------\n");
   const lastRecord = await deviloca.findAll({
@@ -36,6 +35,7 @@ const createLocation = async (payload) => {
         payload.delobarri = getAdress[1];
         console.log(getAdress[1] + " BARRIO");
         await deviloca.create(payload);
+        console.log("Creada");
         resolve();
       }, 1100);
     });
