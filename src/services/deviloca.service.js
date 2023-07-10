@@ -21,16 +21,10 @@ const createLocation = async (payload) => {
   });
 
   if (lastRecord.length < 2 && !valid) {
-    await new Promise((resolve) => {
-      setTimeout(async () => {
-        const getAdress = await getDirections(payload.delolati, payload.delolong);
-        payload.delodire = getAdress[0];
-        payload.delobarri = getAdress[1];
-        console.log(getAdress[1] + " BARRIO");
-        await deviloca.create(payload);
-        resolve();
-      }, 1100);
-    });
+    const getAdress = await getDirections(payload.delolati, payload.delolong);
+    payload.delodire = getAdress[0];
+    payload.delobarri = getAdress[1];
+    await deviloca.create(payload);
   } else if (lastRecord.length >= 2) {
     return await deviloca.update(
       {
