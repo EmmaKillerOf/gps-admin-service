@@ -13,24 +13,18 @@ const createLocation = async (payload) => {
     limit: 2
   });
 
-  const valid = await deviloca.findOne({
+  const valid = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
       delotime: payload.delotime
     }
   });
 
-  if (lastRecord.length < 2 && !valid) {
-    await new Promise((resolve) => {
-      setTimeout(async () => {
-        const getAdress = await getDirections(payload.delolati, payload.delolong);
-        payload.delodire = getAdress[0];
-        payload.delobarri = getAdress[1];
-        console.log(getAdress[1] + " BARRIO");
-        await deviloca.create(payload);
-        resolve();
-      }, 1100);
-    });
+  if (lastRecord.length < 2 && valid.length == 0) {
+    const getAdress = await getDirections(payload.delolati, payload.delolong);
+    payload.delodire = getAdress[0];
+    payload.delobarri = getAdress[1];
+    await deviloca.create(payload);
   } else if (lastRecord.length >= 2) {
     return await deviloca.update(
       {
