@@ -4,6 +4,13 @@ const axios = require('axios');
 
 const createLocation = async (payload) => {
 
+  const valid = await deviloca.findOne({
+    where: {
+      devidelo: payload.devidelo,
+      delotime: payload.delotime
+    }
+  });
+
   console.log(payload);
   console.log("--------------------------\n");
   const lastRecord = await deviloca.findAll({
@@ -14,13 +21,6 @@ const createLocation = async (payload) => {
     },
     order: [['delonuid', 'DESC']],
     limit: 2
-  });
-
-  const valid = await deviloca.findOne({
-    where: {
-      devidelo: payload.devidelo,
-      delotime: payload.delotime
-    }
   });
 
   if (valid) {
