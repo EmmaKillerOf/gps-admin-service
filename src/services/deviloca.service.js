@@ -34,10 +34,11 @@ const createLocation = async (payload) => {
         const getAdress = await getDirections(payload.delolati, payload.delolong);
         payload.delodire = getAdress[0];
         payload.delobarri = getAdress[1];
+        console.log(getAdress[1] + " BARRIO");
+        await deviloca.create(payload);
         resolve();
       }, 1100);
     });
-    await deviloca.create(payload);
   } else if (lastRecord.length >= 2) {
     return await deviloca.update(
       {
