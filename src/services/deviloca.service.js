@@ -20,7 +20,12 @@ const createLocation = async (payload) => {
     }
   });
 
-  if (lastRecord.length < 2 && !valid) {
+  if (valid) {
+    console.log('Registro duplicado. No se realizará la inserción.');
+    return;
+  }
+
+  if (lastRecord.length < 2) {
     await new Promise((resolve) => {
       setTimeout(async () => {
         const getAdress = await getDirections(payload.delolati, payload.delolong);
