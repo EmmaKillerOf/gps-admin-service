@@ -1,7 +1,8 @@
 const ConexionTypeEnum = {
   Conexion: 'conexion',
   Location: 'location',
-  Alarm: 'alarm'
+  Alarm: 'alarm',
+  notTypified: 'unknown'
 }
 
 module.exports = {

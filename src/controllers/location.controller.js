@@ -1,5 +1,6 @@
 
 const devilocaService = require('../services/deviloca.service');
+const devinoalarm = require('../services/devinoalarm.service');
 const deviconeService = require('../services/devicone.service');
 const devialarmService = require('../services/devialar.service');
 const keywordService = require('../services/keyword.service');
@@ -44,6 +45,10 @@ const createLocationsFromRedis = async (req, res) => {
             payload = locationMapping(info);
             await devilocaService.createLocation(payload);
             break;
+          case ConexionTypeEnum.notTypified:
+            payload = notTypifiedMapping(info);
+            await devinoalarm.createRegister(payload);
+            break;
           default:
             break;
         }
@@ -87,6 +92,10 @@ const createLocation = async (req, res) => {
       case ConexionTypeEnum.Location:
         payload = locationMapping(body);
         await devilocaService.createLocation(payload);
+        break;
+      case ConexionTypeEnum.notTypified:
+        payload = notTypifiedMapping(body);
+        await devinoalarm.createRegister(payload);
         break;
       default:
         break;
@@ -231,6 +240,22 @@ const locationMapping = (data) => {
   }
   return payload
 }
+
+const notTypifiedMapping = (data) => {
+  let newArray = [...data];
+  newArray.pop();
+  const last = data[data.length - 1];
+  const payload = {
+    devinodevi: last,
+    /* delofesi: new Date().toISOString().slice(0, 19).replace('T', ' '), */
+    devinoalarm: data[1],
+    devinotime: data[2],
+    devinocade: JSON.stringify(newArray),
+  }
+  return payload
+}
+
+
 
 const alarmMapping = async (data) => {
   //** Example data */
