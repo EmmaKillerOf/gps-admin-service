@@ -106,7 +106,7 @@ const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
           where:{ 
             ...dateQuery,
           },
-          order:[['delotime', 'DESC']],
+          order:[['delotinude', 'DESC']],
         },
         {
           model: carrdevi,
@@ -155,7 +155,8 @@ const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
           separate : true,
           where:{ 
             ...dateQuery
-          }
+          },
+          order:[['delotinude', 'DESC']],
         },
         {
           model: carrdevi,
