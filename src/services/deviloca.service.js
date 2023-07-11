@@ -1,21 +1,14 @@
 const { deviloca } = require('../models');
 const { Op } = require('sequelize');
 const axios = require('axios');
-
 let positions = [];
-
 const createLocation = async (payload) => {
-
   const valid = await deviloca.findOne({
     where: {
       devidelo: payload.devidelo,
       delotime: payload.delotime
     }
   });
-
-  console.log(payload);
-  console.log("--------------------------\n");
-
   const lastRecord = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
@@ -26,14 +19,11 @@ const createLocation = async (payload) => {
     limit: 2
   });
   let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
-
   if (valid || aux.length != 0) {
     console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
-
   if (lastRecord.length < 2) {
-    
     if (aux.length == 0) {
       positions.push(payload);
       await new Promise((resolve) => {
@@ -101,7 +91,7 @@ const getDirections = async (latitude, longitude) => {
     const data = response.data;
     if (data) {
       address = data.display_name;
-      suburb = data.address.suburb;
+      suburb = data.address.village;
     }
     return [address, suburb];
   } catch (error) {
@@ -109,8 +99,6 @@ const getDirections = async (latitude, longitude) => {
     return [address, suburb];
   }
 }
-
-
 
 module.exports = {
   createLocation,
