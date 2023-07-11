@@ -25,14 +25,15 @@ const createLocation = async (payload) => {
     order: [['delonuid', 'DESC']],
     limit: 2
   });
+  let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
 
-  if (valid) {
+  if (valid || aux.length != 0) {
     console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
 
   if (lastRecord.length < 2) {
-    let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
+    
     if (aux.length == 0) {
       positions.push(payload);
       await new Promise((resolve) => {
