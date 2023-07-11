@@ -95,6 +95,10 @@ const getDirections = async (latitude, longitude) => {
         suburb = data.address.neighbourhood;
         return [address, suburb];
       }
+      if(data.address.village){
+        suburb = data.address.village;
+        return [address, suburb];
+      }
       if(data.address.suburb){
         suburb = data.address.suburb;
         return [address, suburb];
