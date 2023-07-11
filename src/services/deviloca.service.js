@@ -91,7 +91,18 @@ const getDirections = async (latitude, longitude) => {
     const data = response.data;
     if (data) {
       address = data.display_name;
-      suburb = data.address.village;
+      if(data.address.neighbourhood){
+        suburb = data.address.neighbourhood;
+        return [address, suburb];
+      }
+      if(data.address.suburb){
+        suburb = data.address.suburb;
+        return [address, suburb];
+      }
+      if(data.address.county){
+        suburb = data.address.county;
+        return [address, suburb];
+      }
     }
     return [address, suburb];
   } catch (error) {
