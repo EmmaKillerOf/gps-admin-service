@@ -1,6 +1,13 @@
 const { devialar } = require('../models');
 const axios = require('axios');
+let positions = [];
 const createAlarm = async (payload) => {
+  const valid = await devialar.findOne({
+    where: {
+      devideal: payload.devideal,
+      dealtime: payload.dealtime
+    }
+  });
   const lastRecord = await devialar.findAll({
     where: {
       devideal: payload.devideal,
@@ -10,21 +17,27 @@ const createAlarm = async (payload) => {
     order: [['devideal', 'DESC']],
     limit: 2
   });
+  let aux = positions.filter(x => x.dealtime == payload.dealtime && x.devideal == payload.devideal);
+  if (valid || aux.length != 0) {
+    console.log('Registro duplicado. No se realizará la inserción.');
+    return;
+  }
+  if (lastRecord.length < 2) {
+    if (aux.length == 0) {
+      positions.push(payload);
+      await new Promise((resolve) => {
+        setTimeout(async () => {
+          const getAdress = await getDirections(payload.deallati, payload.deallong);
+          payload.delodire = getAdress[0];
+          payload.delobarri = getAdress[1];
+          await devialar.create({ ...payload })
+          resolve();
+        }, 1100);
+      });
 
-  const valid = await devialar.findOne({
-    where: {
-      devideal: payload.devideal,
-      dealtime: payload.dealtime
+    } else {
+      positions = [];
     }
-  });
-
-  if (lastRecord.length < 2 && !valid) {
-    setTimeout(async () => {
-      const getAdress = await getDirections(payload.deallati, payload.deallong);
-      payload.delodire = getAdress[0];
-      payload.delobarri = getAdress[1];
-      return await devialar.create({...payload})
-    }, 1500);
   } else if (lastRecord.length >= 2) {
     return await devialar.update(
       {
@@ -47,7 +60,7 @@ const getDirections = async (latitude, longitude) => {
     const data = response.data;
     if (data) {
       address = data.display_name;
-      suburb = data.address.suburb;
+      suburb = data.address.village;
     }
     return [address, suburb];
   } catch (error) {
