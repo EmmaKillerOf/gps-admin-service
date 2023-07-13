@@ -1,9 +1,9 @@
 const { Op, Sequelize } = require("sequelize");
-const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca } = require('../models');
+const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca, kmdevi } = require('../models');
 const { getClassifier } = require("./classifier.service");
 
 const getDevices = async (entityId, available, entityUserId = null) => {
-  const query = entityUserId ? { '$entityDevice.userende$': entityUserId }: {}
+  const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const includes = entityUserId ? [
     {
@@ -18,44 +18,55 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       ...query,
       ...availableQuery
     },
-    order:[
+    order: [
       ['devinuid', 'DESC'],
     ],
-    include:[
+    include: [
       {
         model: carrdevi,
         as: 'carrdevi',
-        attributes:['cadenuid'],
-        include:{
+        attributes: ['cadenuid'],
+        include: {
           model: carrier,
           as: 'carrier',
         }
-      }, 
+      },
       {
         model: clasdevi,
         as: 'clasdevi',
         include: {
-          model:classvalue,
-          as:'classvalue'
+          model: classvalue,
+          as: 'classvalue'
         }
+      },
+      {
+        model: kmdevi,
+        as: 'kmdevi',
+        order: [['kmdiacapt', 'DESC']],
+        limit: 1
       },
       {
         model: deviloca,
         as: 'deviloca',
-        separate : true, // <--- Run separate query
-        order: [['delotinu', 'DESC'],['delotime', 'DESC']],
+        separate: true, // <--- Run separate query
+        order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
         limit: 1
       },
       ...includes,
     ],
-    raw : false ,
-    nest : true
+    raw: false,
+    nest: true
   })
+
+  /* const classifiersDevice = await getCassifierDevice(); */
+
+
+
   return devices
 }
 
 const myDevices = async (entityId, entityUserId = null) => {
-  const query = entityUserId ? { '$entityDevice.userende$': entityUserId }: {}
+  const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const includes = entityUserId ? [
     {
       model: entityDevice,
@@ -68,27 +79,27 @@ const myDevices = async (entityId, entityUserId = null) => {
       entidevi: entityId,
       ...query,
     },
-    order:[
+    order: [
       'devinuid', 'DESC',
     ],
     attributes: ['devinuid'],
-    raw : false ,
-    nest : true
+    raw: false,
+    nest: true
   })
   return devices
 }
 
-const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
+const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
 
   try {
-    const plateQuery = plate ? {[`$carrdevi.carrier.carrlice$`]: plate } : {}
+    const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
-      delotinude: { 
-        [Op.and]:{
+      delotinude: {
+        [Op.and]: {
           [Op.gte]: startDate,
           [Op.lte]: endDate
         }
-      } 
+      }
     }
 
     const deviceResult = await device.findAll({
@@ -100,28 +111,28 @@ const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
       },
       include: [
         {
-          model: deviloca, 
+          model: deviloca,
           as: 'deviloca',
-          separate : true,
-          where:{ 
+          separate: true,
+          where: {
             ...dateQuery,
           },
-          order:[['delotinude', 'DESC']],
+          order: [['delotinude', 'DESC']],
         },
         {
           model: carrdevi,
           as: 'carrdevi',
-          attributes:['cadenuid'],
-          include:{
+          attributes: ['cadenuid'],
+          include: {
             model: carrier,
             as: 'carrier',
           }
-        }, 
+        },
       ],
-      raw : false ,
-      nest : true
+      raw: false,
+      nest: true
     })
-    
+
     return deviceResult
   } catch (error) {
     console.log(error)
@@ -129,15 +140,15 @@ const getDeviceLocation = async ({devices, plate, startDate, endDate}) => {
 
 }
 
-const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
+const getDeviceAlerts = async ({ devices, plate, startDate, endDate }) => {
   try {
     const dateQuery = {
-      delotinude: { 
-        [Op.and]:{
+      delotinude: {
+        [Op.and]: {
           [Op.gte]: startDate,
           [Op.lte]: endDate
         }
-      } 
+      }
     }
 
     const deviceResult = await device.findAll({
@@ -150,28 +161,28 @@ const getDeviceAlerts = async ({devices, plate, startDate, endDate}) => {
       //order:[['delotime', 'DESC']],
       include: [
         {
-          model: devialar, 
+          model: devialar,
           as: 'devialar',
-          separate : true,
-          where:{ 
+          separate: true,
+          where: {
             ...dateQuery
           },
-          order:[['delotinude', 'DESC']],
+          order: [['delotinude', 'DESC']],
         },
         {
           model: carrdevi,
           as: 'carrdevi',
-          attributes:['cadenuid'],
-          include:{
+          attributes: ['cadenuid'],
+          include: {
             model: carrier,
             as: 'carrier',
           }
-        }, 
+        },
       ],
-      raw : false ,
-      nest : true
+      raw: false,
+      nest: true
     })
-    
+
     return deviceResult
   } catch (error) {
     console.log(error)
@@ -186,14 +197,14 @@ const getDevice = async (query) => {
     }
   })
   let classifiers
-  if(query.devinuid){
-    const classifiersResult = await getCassifierDevice(query.devinuid);  
-    classifiers = classifiersResult ? {classifiers: classifiersResult} : {}
+  if (query.devinuid) {
+    const classifiersResult = await getCassifierDevice(query.devinuid);
+    classifiers = classifiersResult ? { classifiers: classifiersResult } : {}
   }
-  return deviceResult ? {...deviceResult, ...classifiers} : deviceResult
+  return deviceResult ? { ...deviceResult, ...classifiers } : deviceResult
 }
 
-const getDeviceById = async (entityId,deviceId) => {
+const getDeviceById = async (entityId, deviceId) => {
   const devices = await device.findOne({
     where: {
       entidevi: entityId,
@@ -209,33 +220,33 @@ const getDeviceByCarrier = async (entityId, carrierId) => {
       entidevi: entityId,
       '$carrdevi.carrcade$': carrierId
     },
-    include:{
-      model: carrdevi, 
+    include: {
+      model: carrdevi,
       as: 'carrdevi',
     },
-    raw : false ,
-    nest : true
+    raw: false,
+    nest: true
   })
   return devices
 }
 
 const createDevice = async (payload) => {
-  const deviceResult = await device.create({...payload})
+  const deviceResult = await device.create({ ...payload })
   return deviceResult
 }
 
 const updateDevice = async (deviceId, payload) => {
   await device.update(
-    {...payload},
+    { ...payload },
     {
       where: {
         devinuid: deviceId
       },
-      raw : false,
+      raw: false,
     }
   )
-  const deviceUpdated = await device.findOne({ where:{ devinuid: deviceId }})
-  
+  const deviceUpdated = await device.findOne({ where: { devinuid: deviceId } })
+
   return deviceUpdated
 }
 
@@ -244,46 +255,46 @@ const getCassifierDevice = async (deviceId) => {
     where: {
       deviclde: deviceId,
     },
-    include:{
+    include: {
       model: classvalue,
       as: 'classvalue',
-      attributes:['clvanuid','clvadesc', 'clvastat'],
+      attributes: ['clvanuid', 'clvadesc', 'clvastat'],
     },
-    raw : false ,
-    nest : true
+    raw: false,
+    nest: true
   })
   return classifiers
 }
 
 const deleteDevice = async (deviceId) => {
   const response = await device.destroy({
-      where: {
-        devinuid: deviceId
-      }
+    where: {
+      devinuid: deviceId
+    }
   })
   return response
 }
 
 const deleteUserDevice = async (deviceId) => {
   const response = await entityDevice.destroy({
-      where: {
-        deviende: deviceId
-      }
+    where: {
+      deviende: deviceId
+    }
   })
   return response
 }
 
 const deleteCarrierDevice = async (deviceId) => {
   const response = await carrdevi.destroy({
-      where: {
-        devicade: deviceId
-      }
+    where: {
+      devicade: deviceId
+    }
   })
   return response
 }
 
 const createClasdevi = async (payload) => {
-  console.log({payload})
+  console.log({ payload })
   const deviceResult = await clasdevi.bulkCreate(payload)
   return deviceResult
 }
@@ -291,9 +302,9 @@ const createClasdevi = async (payload) => {
 
 const deleteClasdevi = async (deviceId) => {
   const response = await clasdevi.destroy({
-      where: {
-        deviclde: deviceId
-      }
+    where: {
+      deviclde: deviceId
+    }
   })
   return response
 }
