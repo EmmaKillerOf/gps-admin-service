@@ -23,6 +23,32 @@ const createLocation = async (payload) => {
     console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
+  const lastRecordRow = await deviloca.findOne({
+    where: {
+      devidelo: payload.devidelo
+    },
+    order: [['delonuid', 'DESC']],
+  });
+  if (lastRecordRow) {
+    if (lastRecordRow.delospee == 0 && payload.delospee == 0) {
+      const parseLat = parseFloat(payload['delolati'].replace(/\./g, ''));
+      const parseLon = parseFloat(payload['delolong'].replace(/\./g, ''));
+      const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
+      if (validate) {
+        return await deviloca.update(
+          {
+            delotime: payload.delotime,
+            delotinude: payload.delotinude,
+            delotinu: payload.delotinu
+          },
+          {
+            where: { delonuid: lastRecordRow.delonuid }
+          }
+        );
+      }
+    }
+  }
+
   if (lastRecord.length < 2) {
     if (aux.length == 0) {
       positions.push(payload);
@@ -38,7 +64,7 @@ const createLocation = async (payload) => {
           resolve();
         }, 1100);
       });
-    }else{
+    } else {
       positions = [];
     }
   } else if (lastRecord.length >= 2) {
@@ -54,6 +80,15 @@ const createLocation = async (payload) => {
     );
   }
 }
+
+const calculateDifference = (lat1, lat2, lon1, lon2, rango) => {
+  const latDiff = Math.abs(lat1 % 1000 - lat2 % 1000);
+  const lonDiff = Math.abs(lon1 % 1000 - lon2 % 1000);
+  if (latDiff <= rango || lonDiff <= rango) {
+    return true;
+  }
+  return false;
+};
 
 const updateCalcKm = async (deviceId, init, fin) => {
   return await deviloca.update(
