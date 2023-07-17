@@ -31,8 +31,11 @@ const createLocation = async (payload) => {
   });
   if (lastRecordRow) {
     if (lastRecordRow.delospee == 0 && payload.delospee == 0) {
-      const delolati = payload.delolati;
-      const delolong = payload.delolong;
+      let delolati = payload.delolati;
+      let delolong = payload.delolong;
+      console.log(delolati);
+      delolati = delolati.toString();
+      delolong = delolong.toString();
       const parseLat = parseFloat(delolati.replace(/\./g, ''));
       const parseLon = parseFloat(delolong.replace(/\./g, ''));
       const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
