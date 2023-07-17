@@ -240,7 +240,10 @@ const locationMapping = (data) => {
     delocalcu: false,
     delotinude: getDatefromTimeAndHours(data[2]),
     delodire: '',
-    delobarri: ''
+    delobarri: '',
+    delomuni:'',  
+    delodepa:'',
+    delopais:'',
   }
   return payload
 }
@@ -294,7 +297,10 @@ const alarmMapping = async (data) => {
     dealspee: calcSpeed(data[11]),
     delotinude: getDatefromTimeAndHours(data[2]),
     delodire: '',
-    delobarri: ''
+    delobarri: '',
+    delomuni:'',  
+    delodepa:'',
+    delopais:'',
   }
 }
 

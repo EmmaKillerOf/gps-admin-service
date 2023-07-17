@@ -30,6 +30,9 @@ const createAlarm = async (payload) => {
           const getAdress = await getDirections(payload.deallati, payload.deallong);
           payload.delodire = getAdress[0];
           payload.delobarri = getAdress[1];
+          payload.delomuni = getAdress[2];
+          payload.delodepa = getAdress[3];
+          payload.delopais = getAdress[4];
           await devialar.create({ ...payload })
           resolve();
         }, 1100);
@@ -53,36 +56,31 @@ const createAlarm = async (payload) => {
 }
 
 const getDirections = async (latitude, longitude) => {
-  let address = ' ';
-  let suburb = ' ';
   try {
     const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
     const data = response.data;
-    if (data) {
-      address = data.display_name;
-      if(data.address.neighbourhood){
-        suburb = data.address.neighbourhood;
-        return [address, suburb];
-      }
-      if(data.address.village){
-        suburb = data.address.village;
-        return [address, suburb];
-      }
-      if(data.address.suburb){
-        suburb = data.address.suburb;
-        return [address, suburb];
-      }
-      if(data.address.county){
-        suburb = data.address.county;
-        return [address, suburb];
-      }
-    }
-    return [address, suburb];
+
+    let address = data.display_name;
+    let suburb = findFirstProperty(data.address, ['neighbourhood', 'village', 'suburb', 'residential', 'county']);
+    let muni = findFirstProperty(data.address, ['city', 'town', 'county']);
+    let dpto = data.address.state || '';
+    let pais = data.address.country || '';
+
+    return [address, suburb, muni, dpto, pais];
   } catch (error) {
     console.log('Error en la solicitud de geocodificación inversa:', error);
-    return [address, suburb];
+    return ['', '', '', '', ''];
   }
-}
+};
+
+const findFirstProperty = (obj, properties) => {
+  for (const property of properties) {
+    if (obj[property]) {
+      return obj[property];
+    }
+  }
+  return '';
+};
 
 module.exports = {
   createAlarm

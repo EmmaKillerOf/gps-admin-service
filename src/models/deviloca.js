@@ -115,6 +115,15 @@ module.exports = (sequelize, DataTypes) => {
     delobarri:{ 
       type:DataTypes.STRING 
     },
+    delomuni:{ 
+      type:DataTypes.STRING 
+    },  
+    delodepa:{ 
+      type:DataTypes.STRING 
+    },
+    delopais:{ 
+      type:DataTypes.STRING 
+    },
   }, {
     sequelize,
     timestamps: false,
