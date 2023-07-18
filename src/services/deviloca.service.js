@@ -30,6 +30,8 @@ const createLocation = async (payload) => {
     order: [['delotime', 'DESC']],
   });
   console.log(lastRecordRow);
+  console.log("---------------------------------------");
+  console.log(payload);
   if (lastRecordRow && lastRecordRow.delospee === 0 && payload.delospee === 0) {
     const { delolati, delolong } = payload;
     const delolatiString = delolati.toString();
