@@ -32,7 +32,8 @@ const createLocation = async (payload) => {
   console.log(lastRecordRow);
   console.log("---------------------------------------");
   console.log(payload);
-  if (lastRecordRow && lastRecordRow.delospee === 0 && payload.delospee === 0) {
+  if (lastRecordRow && lastRecordRow.delospee == 0 && payload.delospee == 0) {
+    console.log("Si entró a evento de parqueo");
     const { delolati, delolong } = payload;
     const delolatiString = delolati.toString();
     const delolongString = delolong.toString();
