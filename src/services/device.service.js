@@ -90,14 +90,16 @@ const myDevices = async (entityId, entityUserId = null) => {
 }
 
 const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
-
   try {
+    let minutesStart = hasTimeIncluded(startDate, 'start');
+    let minutesEnd = hasTimeIncluded(endDate, 'end');
+    console.log(startDate + minutesStart);
     const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
       delotinude: {
         [Op.and]: {
-          [Op.gte]: startDate,
-          [Op.lte]: endDate
+          [Op.gte]: startDate + minutesStart,
+          [Op.lte]: endDate + minutesEnd
         }
       }
     }
@@ -142,11 +144,13 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
 
 const getDeviceAlerts = async ({ devices, plate, startDate, endDate }) => {
   try {
+    let minutesStart = hasTimeIncluded(startDate, 'start');
+    let minutesEnd = hasTimeIncluded(endDate, 'end');
     const dateQuery = {
       delotinude: {
         [Op.and]: {
-          [Op.gte]: startDate,
-          [Op.lte]: endDate
+          [Op.gte]: startDate + minutesStart,
+          [Op.lte]: endDate + minutesEnd
         }
       }
     }
@@ -187,7 +191,21 @@ const getDeviceAlerts = async ({ devices, plate, startDate, endDate }) => {
   } catch (error) {
     console.log(error)
   }
+}
 
+const hasTimeIncluded = (dateString, origin) => {
+  let minutes = '';
+  if(dateString.length==10) {
+    switch (origin) {
+      case 'start':
+        minutes = ' 00:00:00';
+        break;
+      case 'end':
+        minutes = ' 23:59:59';
+        break;
+    }
+  }
+  return minutes;
 }
 
 const getDevice = async (query) => {
