@@ -27,8 +27,9 @@ const createLocation = async (payload) => {
     where: {
       devidelo: payload.devidelo
     },
-    order: [['delonuid', 'DESC']],
+    order: [['delotime', 'DESC']],
   });
+  console.log(lastRecordRow);
   if (lastRecordRow && lastRecordRow.delospee === 0 && payload.delospee === 0) {
     const { delolati, delolong } = payload;
     const delolatiString = delolati.toString();
@@ -36,7 +37,7 @@ const createLocation = async (payload) => {
     const parseLat = parseFloat(delolatiString.replace(/\./g, ''));
     const parseLon = parseFloat(delolongString.replace(/\./g, ''));
     const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
-  
+    console.log(validate);
     if (validate) {
       return await deviloca.update(
         {
