@@ -93,7 +93,6 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
   try {
     let minutesStart = hasTimeIncluded(startDate, 'start');
     let minutesEnd = hasTimeIncluded(endDate, 'end');
-    console.log(startDate + minutesStart);
     const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
       delotinude: {
