@@ -129,7 +129,7 @@ const getDirections = async (latitude, longitude) => {
     const data = response.data;
 
     let address = data.display_name;
-    let suburb = findFirstProperty(data.address, ['neighbourhood', 'village', 'suburb', 'residential', 'county']);
+    let suburb = findFirstProperty(data.address, ['neighbourhood', 'village', 'suburb', 'residential', 'county', 'town']);
     let muni = findFirstProperty(data.address, ['city', 'town', 'county']);
     let dpto = data.address.state || '';
     let pais = data.address.country || '';
