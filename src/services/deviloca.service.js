@@ -29,28 +29,25 @@ const createLocation = async (payload) => {
     },
     order: [['delonuid', 'DESC']],
   });
-  if (lastRecordRow) {
-    if (lastRecordRow.delospee == 0 && payload.delospee == 0) {
-      let delolati = payload.delolati;
-      let delolong = payload.delolong;
-      console.log(delolati);
-      delolati = delolati.toString();
-      delolong = delolong.toString();
-      const parseLat = parseFloat(delolati.replace(/\./g, ''));
-      const parseLon = parseFloat(delolong.replace(/\./g, ''));
-      const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
-      if (validate) {
-        return await deviloca.update(
-          {
-            delotime: payload.delotime,
-            delotinude: payload.delotinude,
-            delotinu: payload.delotinu
-          },
-          {
-            where: { delonuid: lastRecordRow.delonuid }
-          }
-        );
-      }
+  if (lastRecordRow && lastRecordRow.delospee === 0 && payload.delospee === 0) {
+    const { delolati, delolong } = payload;
+    const delolatiString = delolati.toString();
+    const delolongString = delolong.toString();
+    const parseLat = parseFloat(delolatiString.replace(/\./g, ''));
+    const parseLon = parseFloat(delolongString.replace(/\./g, ''));
+    const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
+  
+    if (validate) {
+      return await deviloca.update(
+        {
+          delotime: payload.delotime,
+          delotinude: payload.delotinude,
+          delotinu: payload.delotinu
+        },
+        {
+          where: { delonuid: lastRecordRow.delonuid }
+        }
+      );
     }
   }
 
