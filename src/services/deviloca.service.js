@@ -23,22 +23,16 @@ const createLocation = async (payload) => {
     console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
-  const lastRecordRow = await deviloca.findOne({
-    where: {
-      devidelo: payload.devidelo
-    },
-    order: [['delotime', 'DESC']],
-  });
-  console.log(lastRecordRow);
+  console.log(lastRecord);
   console.log(payload);
   console.log("---------------------------------------");
-  if (lastRecordRow && lastRecordRow.delospee === '0' && payload.delospee === 0) {
+  if (lastRecord.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
     console.log("Si entró a evento de parqueo");
   
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
-    const parseLatSearch = parseFloat(lastRecordRow.delolati.toString().replace(/\./g, ''));
-    const parseLonSearch = parseFloat(lastRecordRow.delolong.toString().replace(/\./g, ''));
+    const parseLatSearch = parseFloat(lastRecord[0].delolati.toString().replace(/\./g, ''));
+    const parseLonSearch = parseFloat(lastRecord[0].delolong.toString().replace(/\./g, ''));
   
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
     console.log(validate);
@@ -51,7 +45,7 @@ const createLocation = async (payload) => {
           delotinu: payload.delotinu
         },
         {
-          where: { delonuid: lastRecordRow.delonuid }
+          where: { delonuid: lastRecord[0].delonuid }
         }
       );
     }
