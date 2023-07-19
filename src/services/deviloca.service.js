@@ -30,17 +30,19 @@ const createLocation = async (payload) => {
     order: [['delotime', 'DESC']],
   });
   console.log(lastRecordRow);
-  console.log("---------------------------------------");
   console.log(payload);
-  if (lastRecordRow && lastRecordRow.delospee == '0' && payload.delospee == 0) {
+  console.log("---------------------------------------");
+  if (lastRecordRow && lastRecordRow.delospee === '0' && payload.delospee === 0) {
     console.log("Si entró a evento de parqueo");
-    const { delolati, delolong } = payload;
-    const delolatiString = delolati.toString();
-    const delolongString = delolong.toString();
-    const parseLat = parseFloat(delolatiString.replace(/\./g, ''));
-    const parseLon = parseFloat(delolongString.replace(/\./g, ''));
-    const validate = calculateDifference(parseLat, lastRecordRow.delolati, parseLon, lastRecordRow.delolong, 100);
+  
+    const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
+    const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
+    const parseLatSearch = parseFloat(lastRecordRow.delolati.toString().replace(/\./g, ''));
+    const parseLonSearch = parseFloat(lastRecordRow.delolong.toString().replace(/\./g, ''));
+  
+    const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
     console.log(validate);
+  
     if (validate) {
       return await deviloca.update(
         {
