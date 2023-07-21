@@ -82,7 +82,7 @@ const createLocation = async (payload) => {
           delotinu: payload.delotinu
         },
         {
-          where: { delonuid: lastRecord[0].delonuid }
+          where: { delonuid: lastRecordPark[0].delonuid }
         }
       );
     }
