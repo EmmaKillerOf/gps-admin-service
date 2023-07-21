@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
+  console.log(payload);
   const valid = await deviloca.findOne({
     where: {
       devidelo: payload.devidelo,
