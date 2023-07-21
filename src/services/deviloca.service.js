@@ -18,12 +18,19 @@ const createLocation = async (payload) => {
     order: [['delotime', 'DESC']],
     limit: 2
   });
+  const lastRecordPark = await deviloca.findAll({
+    where: {
+      devidelo: payload.devidelo,
+    },
+    order: [['delotime', 'DESC']],
+    limit: 2
+  });
   let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
   if (valid || aux.length != 0) {
     return;
   }
 
-  /* if (lastRecord.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
+  if (lastRecordPark.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecord[0].delolati.toString().replace(/\./g, ''));
@@ -79,7 +86,7 @@ const createLocation = async (payload) => {
         }
       );
     }
-  } */
+  }
 
   if (lastRecord.length < 2) {
     if (aux.length == 0) {
