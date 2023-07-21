@@ -12,8 +12,6 @@ const createLocation = async (payload) => {
   const lastRecord = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
-      delolati: payload.delolati,
-      delolong: payload.delolong
     },
     order: [['delotime', 'DESC']],
     limit: 2
