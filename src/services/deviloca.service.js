@@ -1,4 +1,4 @@
-const { deviloca } = require('../models');
+const { deviloca, devialarm } = require('../models');
 const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
@@ -15,28 +15,58 @@ const createLocation = async (payload) => {
       delolati: payload.delolati,
       delolong: payload.delolong
     },
-    order: [['delonuid', 'DESC']],
+    order: [['delotime', 'DESC']],
     limit: 2
   });
   let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
   if (valid || aux.length != 0) {
-    console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
-  console.log(lastRecord);
-  console.log(payload);
-  console.log("---------------------------------------");
+
   if (lastRecord.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
-    console.log("Si entró a evento de parqueo");
-  
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecord[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecord[0].delolong.toString().replace(/\./g, ''));
-  
+
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    console.log(validate);
-  
+
+    /* const validateEvent = devialarm.findOne({
+      where: {
+        devideal: payload.devidelo,
+      },
+      include: [
+        {
+          model: keywords,
+          as: 'keywords',
+          where: {
+            [Op.or]: [{ keywfunc: 'Encendido' }, { keywfunc: 'Apagado' }, { keywcodi: 'on_parking' }],
+          },
+        },
+      ],
+      order: [['dealtime', 'DESC']],
+      limit: 1,
+      raw: false,
+      nest: true,
+    })
+
+    if (validateEvent) {
+      switch (validateEvent.keywfunc) {
+        case 'Inicio parqueo':
+          break;
+        case 'Encendido':
+
+          break;
+
+        case 'Apagado':
+
+          break;
+
+        default:
+          break;
+      }
+    } */
+
     if (validate) {
       return await deviloca.update(
         {
@@ -82,6 +112,15 @@ const createLocation = async (payload) => {
     );
   }
 }
+
+const alarmMapping = () => {
+  const latDiff = Math.abs(lat1 % 1000 - lat2 % 1000);
+  const lonDiff = Math.abs(lon1 % 1000 - lon2 % 1000);
+  if (latDiff <= rango || lonDiff <= rango) {
+    return true;
+  }
+  return false;
+};
 
 const calculateDifference = (lat1, lat2, lon1, lon2, rango) => {
   const latDiff = Math.abs(lat1 % 1000 - lat2 % 1000);
