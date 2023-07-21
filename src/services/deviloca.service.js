@@ -21,7 +21,7 @@ const createLocation = async (payload) => {
     return;
   }
 
-  if (lastRecord.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
+  /* if (lastRecord.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecord[0].delolati.toString().replace(/\./g, ''));
@@ -29,7 +29,7 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    /* const validateEvent = devialarm.findOne({
+    const validateEvent = devialarm.findOne({
       where: {
         devideal: payload.devidelo,
       },
@@ -63,7 +63,7 @@ const createLocation = async (payload) => {
         default:
           break;
       }
-    } */
+    }
 
     if (validate) {
       return await deviloca.update(
@@ -77,7 +77,7 @@ const createLocation = async (payload) => {
         }
       );
     }
-  }
+  } */
 
   if (lastRecord.length < 2) {
     if (aux.length == 0) {
