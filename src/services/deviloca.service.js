@@ -30,15 +30,15 @@ const createLocation = async (payload) => {
     return;
   }
 
-  if (lastRecordPark.length == 2 && lastRecord[0].delospee === '0' && lastRecord[1].delospee === '0' && payload.delospee === 0) {
+  if (lastRecordPark.length == 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && payload.delospee === 0) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
-    const parseLatSearch = parseFloat(lastRecord[0].delolati.toString().replace(/\./g, ''));
-    const parseLonSearch = parseFloat(lastRecord[0].delolong.toString().replace(/\./g, ''));
+    const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
+    const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    const validateEvent = devialarm.findOne({
+    /* const validateEvent = devialarm.findOne({
       where: {
         devideal: payload.devidelo,
       },
@@ -72,7 +72,7 @@ const createLocation = async (payload) => {
         default:
           break;
       }
-    } 
+    }  */
 
     if (validate) {
       return await deviloca.update(
