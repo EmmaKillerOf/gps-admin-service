@@ -3,7 +3,6 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
-  console.log(payload);
   const valid = await deviloca.findOne({
     where: {
       devidelo: payload.devidelo,
@@ -13,6 +12,8 @@ const createLocation = async (payload) => {
   const lastRecord = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
+      delolati: payload.delolati,
+      delolong: payload.delolong
     },
     order: [['delotime', 'DESC']],
     limit: 2
@@ -64,7 +65,7 @@ const createLocation = async (payload) => {
         default:
           break;
       }
-    }
+    } 
 
     if (validate) {
       return await deviloca.update(
