@@ -15,5 +15,11 @@
     "TOKEN": {
         "SECRET": "este-es-el-seed-desarrollo"
     },
-    "PORT": 4000
+    "PORT": 4000,
+    "REDIS": {
+        "host": "34.238.115.44",
+        "port": "6379",
+        "user": "",
+        "pass": ""
+    }
 }
