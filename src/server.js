@@ -6,7 +6,8 @@ const morgan = require('morgan')
 const cors = require('cors')
 var path = require('path')
 const fs = require('fs')
-const config = require('./config/environment')
+const config = require('./config/environment');
+const observableDevice = require('./observables/device')
 const https = require('https')
 const http = require('http')
 
