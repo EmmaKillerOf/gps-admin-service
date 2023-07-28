@@ -54,7 +54,7 @@ async function replaceList(arr, listName) {
 
    // Convierte los elementos en otherArray a objetos JavaScript con el mismo formato
    const otherArrayObjects = arr.map((element) => element.data);
-
+        console.log(otherArrayObjects);
    // Filtra los elementos que no están presentes en otherArrayObjects
    const filteredElements = parsedListElements.filter((element) =>
      otherArrayObjects.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
