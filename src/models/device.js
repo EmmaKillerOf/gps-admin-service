@@ -2,7 +2,6 @@
 const {
   Model
 } = require('sequelize');
-const observableDevice = require('../observables/device');
 module.exports = (sequelize, DataTypes) => {
   class device extends Model {
     /**
@@ -58,6 +57,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   device.afterCreate((instance, options) => {
+    const observableDevice = require('../observables/device');
     observableDevice.sendDevices('listDevices')
     .then(() => {
       console.log('Lista de dispositivos actualizada después de actualizar un registro.');
@@ -70,6 +70,7 @@ module.exports = (sequelize, DataTypes) => {
 
   // Agregar hook después de actualizar (afterUpdate)
   device.afterUpdate((instance, options) => {
+    const observableDevice = require('../observables/device');
     console.log("actualizado");
     observableDevice.sendDevices('listDevices')
     .then(() => {
