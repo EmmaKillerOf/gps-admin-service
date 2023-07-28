@@ -51,7 +51,7 @@ async function replaceList(arr, listName) {
 
     // Convierte los elementos de la lista de Redis a objetos JavaScript
     const parsedListElements = listElements.map(JSON.parse);
-
+    console.log(parsedListElements);
    // Convierte los elementos en otherArray a objetos JavaScript con el mismo formato
    const otherArrayObjects = arr;
    // Filtra los elementos que no están presentes en otherArrayObjects
