@@ -46,52 +46,34 @@ async function pushToList(arr, listName) {
 async function replaceList(arr, listName) {
     console.log(arr);
     try {
-        deleteAllList(listName)
-            .then(async result => {
-                await newList(arr, listName);
-            })
-            .catch(error => {
-                // Aquí puedes manejar cualquier error que ocurra durante la eliminación
-                console.error('Error durante la eliminación:', error);
-            });
+        // Obtén todos los elementos de la lista en Redis
+    const listElements = await client.lrange(listName, 0, -1);
 
+    // Convierte los elementos de la lista de Redis a objetos JavaScript
+    const parsedListElements = listElements.map(JSON.parse);
+
+    // Filtra los elementos que no están presentes en el otro array
+    const filteredElements = parsedListElements.filter((element) =>
+    arr.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
+    );
+
+    // Elimina todos los elementos de la lista en Redis
+    await client.del(listName);
+
+    // Agrega los elementos filtrados nuevamente a la lista en Redis
+    const promises = filteredElements.map((element) =>
+      client.rpush(listName, JSON.stringify(element))
+    );
+
+    await Promise.all(promises);
+
+    console.log(`Lista "${listName}" actualizada correctamente.`);
         
     } catch (error) {
         console.error('Error:', error);
         throw error;
     }
 }
-
-async function newList(arr, listName) {
-    const promises = arr.map((element) => {
-        return new Promise((resolve, reject) => {
-            client.rpush(listName, JSON.stringify(element), (error, result) => {
-                if (error) {
-                    console.error('Error al agregar elemento a la nueva lista:', error);
-                    reject(error);
-                } else {
-                    resolve(result);
-                }
-            });
-        });
-    });
-    await Promise.all(promises);
-}
-
-function deleteAllList(listName) {
-    return new Promise((resolve, reject) => {
-        client.del(listName, (error, result) => {
-            if (error) {
-                console.error('Error al eliminar la lista:', error);
-                reject(error);
-            } else {
-                console.log(`Lista "${listName}" eliminada con éxito.`);
-                resolve(result);
-            }
-        });
-    });
-}
-
 async function deleteList() {
     try {
         await new Promise((resolve, reject) => {
