@@ -1,7 +1,7 @@
 const { device } = require('../models');
 const { replaceList } = require('../lib/redis');
 
-const sendDevices = async (listName) => {
+async function sendDevices (listName) {
     try {
         const devices = await device.findAll({
             devistat: 1
