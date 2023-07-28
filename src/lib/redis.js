@@ -52,21 +52,23 @@ async function replaceList(arr, listName) {
     // Convierte los elementos de la lista de Redis a objetos JavaScript
     const parsedListElements = listElements.map(JSON.parse);
 
-    // Filtra los elementos que no están presentes en el otro array
-    const filteredElements = parsedListElements.filter((element) =>
-    arr.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
-    );
+   // Convierte los elementos en otherArray a objetos JavaScript con el mismo formato
+   const otherArrayObjects = arr.map((element) => element.data);
 
-    // Elimina todos los elementos de la lista en Redis
-    await client.del(listName);
-    console.log(filteredElements);
-    console.log("-----------------");
-    // Agrega los elementos filtrados nuevamente a la lista en Redis
-    const promises = filteredElements.map((element) =>
-      client.rpush(listName, JSON.stringify(element))
-    );
+   // Filtra los elementos que no están presentes en otherArrayObjects
+   const filteredElements = parsedListElements.filter((element) =>
+     otherArrayObjects.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
+   );
 
-    await Promise.all(promises);
+   // Elimina todos los elementos de la lista en Redis
+   await client.del(listName);
+
+   // Agrega los elementos filtrados nuevamente a la lista en Redis
+   const promises = filteredElements.map((element) =>
+     client.rpush(listName, JSON.stringify(element))
+   );
+
+   await Promise.all(promises);
 
     console.log(`Lista "${listName}" actualizada correctamente.`);
         
