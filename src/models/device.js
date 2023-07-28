@@ -82,6 +82,19 @@ module.exports = (sequelize, DataTypes) => {
     // Aquí puedes realizar cualquier acción que desees después de actualizar un registro
   });
 
+  device.afterDestroy((instance, options) => {
+    // Hook después de eliminar un registro
+    // Aquí puedes realizar cualquier acción que desees después de eliminar un registro
+    const observableDevice = require('../observables/device');
+    observableDevice.sendDevices('listDevices')
+      .then(() => {
+        console.log('Lista de dispositivos actualizada después de eliminar un registro.');
+      })
+      .catch((error) => {
+        console.error('Error al actualizar la lista de dispositivos después de eliminar:', error);
+      });
+  });
+
 
   return device;
 };
