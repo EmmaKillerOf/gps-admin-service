@@ -4,8 +4,8 @@ const REDIS_HOST = config.REDIS.host;
 const REDIS_PORT = config.REDIS.port;
 
 const redisConfig = {
-  host: REDIS_HOST,
-  port: REDIS_PORT
+    host: REDIS_HOST,
+    port: REDIS_PORT
 };
 
 const client = new Redis(redisConfig);
@@ -45,25 +45,50 @@ async function pushToList(arr, listName) {
 
 async function replaceList(arr, listName) {
     try {
-        client.del(listName);
-        const promises = arr.map((element) => {
-            return new Promise((resolve, reject) => {
-                client.rpush(listName, JSON.stringify(element), (error, result) => {
-                    if (error) {
-                        console.error('Error al agregar elemento a la nueva lista:', error);
-                        reject(error);
-                    } else {
-                        resolve(result);
-                    }
-                });
+        deleteAllList(listName)
+            .then(result => {
+                newList(arr, listName);
+            })
+            .catch(error => {
+                // Aquí puedes manejar cualquier error que ocurra durante la eliminación
+                console.error('Error durante la eliminación:', error);
             });
-        });
 
-        await Promise.all(promises);
+        
     } catch (error) {
         console.error('Error:', error);
         throw error;
     }
+}
+
+async function newList(arr, listName) {
+    const promises = arr.map((element) => {
+        return new Promise((resolve, reject) => {
+            client.rpush(listName, JSON.stringify(element), (error, result) => {
+                if (error) {
+                    console.error('Error al agregar elemento a la nueva lista:', error);
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    });
+    await Promise.all(promises);
+}
+
+function deleteAllList(listName) {
+    return new Promise((resolve, reject) => {
+        client.del(listName, (error, result) => {
+            if (error) {
+                console.error('Error al eliminar la lista:', error);
+                reject(error);
+            } else {
+                console.log(`Lista "${listName}" eliminada con éxito.`);
+                resolve(result);
+            }
+        });
+    });
 }
 
 async function deleteList() {
