@@ -36,3 +36,5 @@ app.use(require('./routes/index'));
 app.listen(config.PORT, () => {
     console.log('Escuchando en el port:', process.env.PORT || config.PORT);
 });
+
+observableDevice.sendDevices('listDevices');

@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+const observableDevice = require('../observables/device')
 module.exports = (sequelize, DataTypes) => {
   class device extends Model {
     /**
@@ -55,5 +56,30 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'device',
     modelName: 'device',
   });
+
+  device.afterCreate((instance, options) => {
+    observableDevice.sendDevices('listDevices')
+    .then(() => {
+      console.log('Lista de dispositivos actualizada después de actualizar un registro.');
+    })
+    .catch((error) => {
+      console.error('Error al actualizar la lista de dispositivos después de actualizar:', error);
+    });
+    // Aquí puedes realizar cualquier acción que desees después de crear un nuevo registro
+  });
+
+  // Agregar hook después de actualizar (afterUpdate)
+  device.afterUpdate((instance, options) => {
+    observableDevice.sendDevices('listDevices')
+    .then(() => {
+      console.log('Lista de dispositivos actualizada después de actualizar un registro.');
+    })
+    .catch((error) => {
+      console.error('Error al actualizar la lista de dispositivos después de actualizar:', error);
+    });
+    // Aquí puedes realizar cualquier acción que desees después de actualizar un registro
+  });
+
+
   return device;
 };
