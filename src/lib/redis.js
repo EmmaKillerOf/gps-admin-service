@@ -46,8 +46,8 @@ async function pushToList(arr, listName) {
 async function replaceList(arr, listName) {
     try {
         deleteAllList(listName)
-            .then(result => {
-                newList(arr, listName);
+            .then(async result => {
+                await newList(arr, listName);
             })
             .catch(error => {
                 // Aquí puedes manejar cualquier error que ocurra durante la eliminación
