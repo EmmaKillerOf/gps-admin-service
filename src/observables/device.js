@@ -13,5 +13,5 @@ async function sendDevices (listName) {
 }
 
 module.exports = {
-    sendDevices
+    sendDevices: sendDevices
 }

@@ -2,7 +2,7 @@
 const {
   Model
 } = require('sequelize');
-const observableDevice = require('../observables/device')
+const observableDevice = require('../observables/device');
 module.exports = (sequelize, DataTypes) => {
   class device extends Model {
     /**
