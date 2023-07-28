@@ -34,13 +34,13 @@ connection.connect((err) => {
     function checkTableChanges(tableName) {
         let previousData = [];
         function handleChanges() {
-            getTableData(tableName, (error, currentData) => {
+            getTableData(tableName, async (error, currentData) => {
                 if (error) {
                     console.error('Error al obtener los datos de la tabla:', error);
                     return;
                 }
                 if (JSON.stringify(currentData) !== JSON.stringify(previousData)) {
-                    replaceList(currentData, 'listDevices');
+                    await replaceList(currentData, 'listDevices');
                 }
                 previousData = currentData;
             });
