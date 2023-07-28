@@ -44,6 +44,7 @@ async function pushToList(arr, listName) {
 }
 
 async function replaceList(arr, listName) {
+    console.log(arr);
     try {
         deleteAllList(listName)
             .then(async result => {
