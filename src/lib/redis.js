@@ -46,24 +46,11 @@ async function pushToList(arr, listName) {
 async function replaceList(arr, listName) {
     console.log(arr);
     try {
-        // Obtén todos los elementos de la lista en Redis
-    const listElements = await client.lrange(listName, 0, -1);
-        console.log(listElements);
-    // Convierte los elementos de la lista de Redis a objetos JavaScript
-    const parsedListElements = listElements.map(JSON.parse);
-    console.log(parsedListElements);
-   // Convierte los elementos en otherArray a objetos JavaScript con el mismo formato
-   const otherArrayObjects = arr;
-   // Filtra los elementos que no están presentes en otherArrayObjects
-   const filteredElements = parsedListElements.filter((element) =>
-     otherArrayObjects.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
-   );
-    console.log(filteredElements);
    // Elimina todos los elementos de la lista en Redis
    await client.del(listName);
 
    // Agrega los elementos filtrados nuevamente a la lista en Redis
-   const promises = filteredElements.map((element) =>
+   const promises = arr.map((element) =>
      client.rpush(listName, JSON.stringify(element))
    );
 
