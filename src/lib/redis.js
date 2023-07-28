@@ -48,7 +48,7 @@ async function replaceList(arr, listName) {
     try {
         // Obtén todos los elementos de la lista en Redis
     const listElements = await client.lrange(listName, 0, -1);
-
+        console.log(listElements);
     // Convierte los elementos de la lista de Redis a objetos JavaScript
     const parsedListElements = listElements.map(JSON.parse);
     console.log(parsedListElements);
