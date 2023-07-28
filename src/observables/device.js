@@ -40,7 +40,7 @@ connection.connect((err) => {
                     return;
                 }
                 if (JSON.stringify(currentData) !== JSON.stringify(previousData)) {
-                    await replaceList(currentData, 'listDevices');
+                    replaceList(currentData, 'listDevices');
                 }
                 previousData = currentData;
             });

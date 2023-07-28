@@ -59,7 +59,7 @@ async function replaceList(arr, listName) {
    const filteredElements = parsedListElements.filter((element) =>
      otherArrayObjects.some((otherElement) => JSON.stringify(otherElement) === JSON.stringify(element))
    );
-
+    console.log(filteredElements);
    // Elimina todos los elementos de la lista en Redis
    await client.del(listName);
 
