@@ -59,7 +59,8 @@ async function replaceList(arr, listName) {
 
     // Elimina todos los elementos de la lista en Redis
     await client.del(listName);
-
+    console.log(filteredElements);
+    console.log("-----------------");
     // Agrega los elementos filtrados nuevamente a la lista en Redis
     const promises = filteredElements.map((element) =>
       client.rpush(listName, JSON.stringify(element))
