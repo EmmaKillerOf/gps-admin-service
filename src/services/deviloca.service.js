@@ -1,4 +1,4 @@
-const { deviloca, devialar } = require('../models');
+const { deviloca, devialar, keywords } = require('../models');
 const devialarmService = require('./devialar.service');
 const { Op } = require('sequelize');
 const axios = require('axios');
