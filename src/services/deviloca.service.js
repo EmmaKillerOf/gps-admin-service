@@ -31,7 +31,34 @@ const createLocation = async (payload) => {
     return;
   }
 
-  if (lastRecordPark.length == 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && payload.delospee === 0) {
+  const isConditionMet = lastRecordPark.length === 2 &&
+    lastRecordPark[0].delospee === '0' &&
+    lastRecordPark[1].delospee === '0' &&
+    payload.delospee === 0;
+
+  const validateEvent = await devialarm.findOne({
+    where: {
+      devideal: payload.devidelo,
+    },
+    include: [
+      {
+        model: keywords,
+        as: 'keywords',
+        where: {
+          [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
+        },
+      },
+    ],
+    order: [['dealtime', 'DESC']],
+    limit: 1,
+    raw: true,
+    nest: true,
+  });
+
+  let payloadAlarmType = 22;
+  let createAlarm = false;
+
+  if (isConditionMet) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
@@ -39,37 +66,19 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    const validateEvent = await devialarm.findOne({
-      where: {
-        devideal: payload.devidelo,
-      },
-      include: [
-        {
-          model: keywords,
-          as: 'keywords',
-          where: {
-            [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
-          },
-        },
-      ],
-      order: [['dealtime', 'DESC']],
-      limit: 1,
-      raw: true,
-      nest: true,
-    });
-    
-    let payloadAlarmType = 22, createAlarm = false;
     if (payload.deloacc === 1 && (!validateEvent || validateEvent.keywfunc === 'end_ralenti')) {
       payloadAlarmType = 22;
       createAlarm = true;
-    } else if (validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+    } else if (payload.deloacc === 0 && validateEvent && validateEvent.keywfunc === 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }
-    if(createAlarm){
+
+    if (createAlarm) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
     }
+
     if (validate) {
       return await deviloca.update(
         {
@@ -84,6 +93,16 @@ const createLocation = async (payload) => {
           where: { delonuid: lastRecordPark[0].delonuid }
         }
       );
+    }
+  } else {
+    if (payload.deloacc === 1 && validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+      payloadAlarmType = 23;
+      createAlarm = true;
+    }
+
+    if (createAlarm) {
+      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
+      await devialarmService.createAlarm(newPayloadAlarm);
     }
   }
 
