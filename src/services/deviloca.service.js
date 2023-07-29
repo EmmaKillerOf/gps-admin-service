@@ -1,4 +1,4 @@
-const { deviloca, devialarm } = require('../models');
+const { deviloca, devialar } = require('../models');
 const devialarmService = require('./devialar.service');
 const { Op } = require('sequelize');
 const axios = require('axios');
@@ -36,7 +36,7 @@ const createLocation = async (payload) => {
     lastRecordPark[1].delospee === '0' &&
     payload.delospee === 0;
 
-  const validateEvent = await devialarm.findOne({
+  const validateEvent = await devialar.findOne({
     where: {
       devideal: payload.devidelo,
     },
