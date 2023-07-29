@@ -1,4 +1,5 @@
 const { deviloca, devialarm } = require('../models');
+const devialarmService = require('./devialar.service');
 const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
@@ -38,48 +39,67 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    /* const validateEvent = devialarm.findOne({
-      where: {
-        devideal: payload.devidelo,
-      },
-      include: [
-        {
-          model: keywords,
-          as: 'keywords',
-          where: {
-            [Op.or]: [{ keywfunc: 'Encendido' }, { keywfunc: 'Apagado' }, { keywcodi: 'on_parking' }],
-          },
+    if (payload.deloacc === 1) {
+      const validateEvent = devialarm.findOne({
+        where: {
+          devideal: payload.devidelo,
         },
-      ],
-      order: [['dealtime', 'DESC']],
-      limit: 1,
-      raw: false,
-      nest: true,
-    })
+        include: [
+          {
+            model: keywords,
+            as: 'keywords',
+            where: {
+              [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
+            },
+          },
+        ],
+        order: [['dealtime', 'DESC']],
+        limit: 1,
+        raw: true,
+        nest: true,
+      })
 
-    if (validateEvent) {
-      switch (validateEvent.keywfunc) {
-        case 'Inicio parqueo':
-          break;
-        case 'Encendido':
-
-          break;
-
-        case 'Apagado':
-
-          break;
-
-        default:
-          break;
+      if (!validateEvent || validateEvent.keywfunc === 'end_ralenti') {
+        const newPayloadAlarm = await createPayloadAlarm(payload, 22);
+        await devialarmService.createAlarm(newPayloadAlarm);
       }
-    }  */
+
+    } else {
+      const validateEvent = devialarm.findOne({
+        where: {
+          devideal: payload.devidelo,
+        },
+        include: [
+          {
+            model: keywords,
+            as: 'keywords',
+            where: {
+              [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
+            },
+          },
+        ],
+        order: [['dealtime', 'DESC']],
+        limit: 1,
+        raw: true,
+        nest: true,
+      })
+
+      if (validateEvent.keywfunc === 'on_ralenti') {
+        const newPayloadAlarm = await createPayloadAlarm(payload, 23);
+        await devialarmService.createAlarm(newPayloadAlarm);
+      }
+    }
+
 
     if (validate) {
       return await deviloca.update(
         {
           delotime: payload.delotime,
           delotinude: payload.delotinude,
-          delotinu: payload.delotinu
+          delotinu: payload.delotinu,
+          deloacc: payload.deloacc,
+          delodoor: payload.delodoor,
+          delosigc: payload.delosigc
         },
         {
           where: { delonuid: lastRecordPark[0].delonuid }
@@ -111,7 +131,10 @@ const createLocation = async (payload) => {
       {
         delotime: payload.delotime,
         delotinude: payload.delotinude,
-        delotinu: payload.delotinu
+        delotinu: payload.delotinu,
+        deloacc: payload.deloacc,
+        delodoor: payload.delodoor,
+        delosigc: payload.delosigc
       },
       {
         where: { delonuid: lastRecord[0].delonuid }
@@ -119,6 +142,36 @@ const createLocation = async (payload) => {
     );
   }
 }
+
+const createPayloadAlarm = async (payload, typeIdAlarm) => {
+  const getAdress = await getDirections(payload.delolati, payload.delolong);
+  payload.delodire = getAdress[0];
+  payload.delobarri = getAdress[1];
+  payload.delomuni = getAdress[2];
+  payload.delodepa = getAdress[3];
+  payload.delopais = getAdress[4];
+  return {
+    devideal: payload.devidelo,
+    keywdeal: typeIdAlarm,
+    dealstat: true,
+    dealtinu: payload.delotinu,
+    dealtime: payload.delotime,
+    dealsign: payload.delosigc,
+    dealhour: payload.delohour,
+    deallati: payload.delolati,
+    deallaor: payload.delolaor,
+    deallong: payload.delolong,
+    dealloor: payload.deloloor,
+    dealspee: payload.delospee,
+    delotinude: payload.delotinude,
+    delodire: payload.delodire,
+    delobarri: payload.delobarri,
+    delomuni: payload.delomuni,
+    delodepa: payload.delodepa,
+    delopais: payload.delopais,
+  };
+};
+
 
 const alarmMapping = () => {
   const latDiff = Math.abs(lat1 % 1000 - lat2 % 1000);
