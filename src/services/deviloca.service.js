@@ -39,58 +39,37 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    if (payload.deloacc === 1) {
-      const validateEvent = devialarm.findOne({
-        where: {
-          devideal: payload.devidelo,
-        },
-        include: [
-          {
-            model: keywords,
-            as: 'keywords',
-            where: {
-              [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
-            },
+    const validateEvent = await devialarm.findOne({
+      where: {
+        devideal: payload.devidelo,
+      },
+      include: [
+        {
+          model: keywords,
+          as: 'keywords',
+          where: {
+            [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
           },
-        ],
-        order: [['dealtime', 'DESC']],
-        limit: 1,
-        raw: true,
-        nest: true,
-      })
-
-      if (!validateEvent || validateEvent.keywfunc === 'end_ralenti') {
-        const newPayloadAlarm = await createPayloadAlarm(payload, 22);
-        await devialarmService.createAlarm(newPayloadAlarm);
-      }
-
-    } else {
-      const validateEvent = devialarm.findOne({
-        where: {
-          devideal: payload.devidelo,
         },
-        include: [
-          {
-            model: keywords,
-            as: 'keywords',
-            where: {
-              [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
-            },
-          },
-        ],
-        order: [['dealtime', 'DESC']],
-        limit: 1,
-        raw: true,
-        nest: true,
-      })
-
-      if (validateEvent.keywfunc === 'on_ralenti') {
-        const newPayloadAlarm = await createPayloadAlarm(payload, 23);
-        await devialarmService.createAlarm(newPayloadAlarm);
-      }
+      ],
+      order: [['dealtime', 'DESC']],
+      limit: 1,
+      raw: true,
+      nest: true,
+    });
+    
+    let payloadAlarmType = 22, createAlarm = false;
+    if (payload.deloacc === 1 && (!validateEvent || validateEvent.keywfunc === 'end_ralenti')) {
+      payloadAlarmType = 22;
+      createAlarm = true;
+    } else if (validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+      payloadAlarmType = 23;
+      createAlarm = true;
     }
-
-
+    if(createAlarm){
+      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
+      await devialarmService.createAlarm(newPayloadAlarm);
+    }
     if (validate) {
       return await deviloca.update(
         {
