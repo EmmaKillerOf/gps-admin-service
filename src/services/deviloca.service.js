@@ -66,14 +66,14 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    if (payload.deloacc === 1 && (!validateEvent || validateEvent.keywfunc === 'end_ralenti')) {
+    if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywfunc == 'end_ralenti')) {
       payloadAlarmType = 22;
       createAlarm = true;
-    } else if (payload.deloacc === 0 && validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+    } else if (payload.deloacc == 0 && validateEvent && validateEvent.keywfunc == 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }
-
+    console.log(createAlarm);
     if (createAlarm) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
