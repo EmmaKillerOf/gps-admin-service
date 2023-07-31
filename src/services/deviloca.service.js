@@ -50,7 +50,6 @@ const createLocation = async (payload) => {
       },
     ],
     order: [['dealtime', 'DESC']],
-    limit: 1,
     raw: true,
     nest: true,
   });
