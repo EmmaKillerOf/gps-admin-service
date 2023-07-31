@@ -35,7 +35,6 @@ const createLocation = async (payload) => {
     lastRecordPark[0].delospee === '0' &&
     lastRecordPark[1].delospee === '0' &&
     payload.delospee === 0;
-  console.log(payload.devidelo);
   const validateEvent = await keywords.findOne({
     where: {
       [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
@@ -64,7 +63,6 @@ const createLocation = async (payload) => {
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    console.log(validateEvent);
     if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywcodi == 'end_ralenti')) {
       payloadAlarmType = 22;
       createAlarm = true;
@@ -72,7 +70,6 @@ const createLocation = async (payload) => {
       payloadAlarmType = 23;
       createAlarm = true;
     }
-    console.log(createAlarm);
     if (createAlarm) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
