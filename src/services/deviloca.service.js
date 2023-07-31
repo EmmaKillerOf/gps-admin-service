@@ -95,7 +95,7 @@ const createLocation = async (payload) => {
       );
     }
   } else {
-    if (payload.deloacc === 1 && validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+    if (validateEvent && validateEvent.keywfunc === 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }
