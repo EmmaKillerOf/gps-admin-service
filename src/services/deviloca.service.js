@@ -24,6 +24,7 @@ const createLocation = async (payload) => {
       devideal: devidelo,
       [Op.or]: [{ '$keywords.keywcodi$': 'on_ralenti' }, { '$keywords.keywcodi$': 'end_ralenti' }]
     },
+    order: [['dealtime', 'DESC']],
     include: [{ model: keywords, as: 'keywords' }],
     raw: true,
     nest: true,
@@ -35,6 +36,7 @@ const createLocation = async (payload) => {
       devideal: devidelo,
       [Op.or]: [{ '$keywords.keywcodi$': 'on_parking' }, { '$keywords.keywcodi$': 'end_parking' }]
     },
+    order: [['dealtime', 'DESC']],
     include: [{ model: keywords, as: 'keywords' }],
     raw: true,
     nest: true,
