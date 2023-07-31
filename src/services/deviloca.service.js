@@ -35,7 +35,7 @@ const createLocation = async (payload) => {
     lastRecordPark[0].delospee === '0' &&
     lastRecordPark[1].delospee === '0' &&
     payload.delospee === 0;
-
+  console.log(payload.devidelo);
   const validateEvent = await keywords.findOne({
     where: {
       [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
