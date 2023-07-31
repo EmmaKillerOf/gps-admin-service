@@ -69,6 +69,7 @@ const createLocation = async (payload) => {
       payloadAlarmType = 23;
       createAlarm = true;
     }
+    console.log(createAlarm);
     if (createAlarm) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
