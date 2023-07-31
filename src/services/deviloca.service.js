@@ -36,20 +36,20 @@ const createLocation = async (payload) => {
     lastRecordPark[1].delospee === '0' &&
     payload.delospee === 0;
 
-  const validateEvent = await devialar.findOne({
+  const validateEvent = await keywords.findOne({
     where: {
-      devideal: payload.devidelo,
+      [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
     },
     include: [
       {
-        model: keywords,
-        as: 'keywords',
+        model: devialar,
+        as: 'devialar',
         where: {
-          [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
+          devideal: payload.devidelo,
         },
+        order: [['dealtime', 'DESC']],
       },
     ],
-    order: [['dealtime', 'DESC']],
     raw: true,
     nest: true,
   });
