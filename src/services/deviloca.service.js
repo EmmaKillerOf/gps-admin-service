@@ -65,7 +65,7 @@ const createLocation = async (payload) => {
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-
+    console.log(validateEvent);
     if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywcodi == 'end_ralenti')) {
       payloadAlarmType = 22;
       createAlarm = true;
