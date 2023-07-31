@@ -4,143 +4,103 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
+  const { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu } = payload;
+
+  // Consulta para verificar la validez
   const valid = await deviloca.findOne({
-    where: {
-      devidelo: payload.devidelo,
-      delotime: payload.delotime
-    }
+    where: { devidelo, delotime }
   });
-  const lastRecord = await deviloca.findAll({
-    where: {
-      devidelo: payload.devidelo,
-      delolati: payload.delolati,
-      delolong: payload.delolong
-    },
+
+  // Consulta para obtener los últimos registros de ubicación
+  const lastRecords = await deviloca.findAll({
+    where: { devidelo },
     order: [['delotime', 'DESC']],
     limit: 2
   });
-  const lastRecordPark = await deviloca.findAll({
-    where: {
-      devidelo: payload.devidelo,
-    },
-    order: [['delotime', 'DESC']],
-    limit: 2
-  });
-  let aux = positions.filter(x => x.delotime == payload.delotime && x.devidelo == payload.devidelo);
-  if (valid || aux.length != 0) {
-    return;
-  }
-  const isConditionMet = lastRecordPark.length === 2 &&
-    lastRecordPark[0].delospee === '0' &&
-    lastRecordPark[1].delospee === '0' &&
-    payload.delospee === 0;
+
+  // Consulta para verificar eventos en la tabla devialar
   const validateEvent = await devialar.findOne({
     where: {
-      devideal: payload.devidelo,
+      devideal: devidelo,
+      [Op.or]: [{ '$keywords.keywcodi$': 'on_ralenti' }, { '$keywords.keywcodi$': 'end_ralenti' }]
     },
-    order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
-    include: [
-      {
-        model: keywords,
-        as: 'keywords',
-        where: {
-          [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
-        },
-      },
-    ],
+    include: [{ model: keywords, as: 'keywords' }],
     raw: true,
     nest: true,
   });
+
+  // Consulta para verificar eventos de estacionamiento en la tabla devialar
   const validateEventPark = await devialar.findOne({
     where: {
-      devideal: payload.devidelo,
+      devideal: devidelo,
+      [Op.or]: [{ '$keywords.keywcodi$': 'on_parking' }, { '$keywords.keywcodi$': 'end_parking' }]
     },
-    order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
-    include: [
-      {
-        model: keywords,
-        as: 'keywords',
-        where: {
-          [Op.or]: [{ keywcodi: 'on_parking' }, { keywcodi: 'end_parking' }],
-        },
-      },
-    ],
+    include: [{ model: keywords, as: 'keywords' }],
     raw: true,
     nest: true,
   });
-  let payloadAlarmType = 22;
-  let createAlarm = false, createAlarmPark = false;
+
+  // Verificar si ya existe un registro válido o si hay duplicados
+  const hasValidRecord = valid || positions.some(x => x.delotime === delotime && x.devidelo === devidelo);
+  if (hasValidRecord) {
+    return;
+  }
+
+  // Verificar si se cumple la condición para crear la alarma
+  const isConditionMet = lastRecords.length === 2 && lastRecords[0].delospee === '0' && lastRecords[1].delospee === '0' && delospee === 0;
+
+  // Función para crear alarmas si la condición se cumple
+  const createAlarmIfValid = async (condition, alarmType) => {
+    if (condition) {
+      const newPayloadAlarm = await createPayloadAlarm(payload, alarmType);
+      await devialarmService.createAlarm(newPayloadAlarm);
+    }
+  };
+
   if (isConditionMet) {
-    const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
-    const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
-    const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
-    const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
+    const parseLat = parseFloat(delolati.toString().replace(/\./g, ''));
+    const parseLon = parseFloat(delolong.toString().replace(/\./g, ''));
+    const parseLatSearch = parseFloat(lastRecords[0].delolati.toString().replace(/\./g, ''));
+    const parseLonSearch = parseFloat(lastRecords[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywords.keywcodi == 'end_ralenti')) {
-      payloadAlarmType = 22;
-      createAlarm = true;
-    } else if (payload.deloacc == 0 && validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
-      payloadAlarmType = 23;
-      createAlarm = true;
-    }
-    if (createAlarm) {
-      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
-      await devialarmService.createAlarm(newPayloadAlarm);
+
+    // Crear alarma según la condición
+    if (deloacc === 1 && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
+      await createAlarmIfValid(true, 22);
+    } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
+      await createAlarmIfValid(true, 23);
     }
 
-    if (payload.deloacc == 0 && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
-      payloadAlarmType = 20;
-      createAlarmPark = true;
-    } else if (payload.deloacc == 1 && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
-      payloadAlarmType = 21;
-      createAlarmPark = true;
-    }
-    if (createAlarmPark) {
-      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
-      await devialarmService.createAlarm(newPayloadAlarm);
+    if (deloacc === 0 && lastRecords[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
+      await createAlarmIfValid(true, 20);
+    } else if (deloacc === 1 && validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking') {
+      await createAlarmIfValid(true, 21);
     }
 
+    // Actualizar deviloca si la validación se cumple
     if (validate) {
       return await deviloca.update(
         {
-          delotime: payload.delotime,
-          delotinude: payload.delotinude,
-          delotinu: payload.delotinu,
-          deloacc: payload.deloacc,
-          delodoor: payload.delodoor,
-          delosigc: payload.delosigc
+          delotime, delotinude, delotinu, deloacc, delodoor, delosigc
         },
         {
-          where: { delonuid: lastRecordPark[0].delonuid }
+          where: { delonuid: lastRecords[0].delonuid }
         }
       );
     }
   } else {
-    if (validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
-      payloadAlarmType = 23;
-      createAlarm = true;
-    }
-    if (createAlarm) {
-      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
-      await devialarmService.createAlarm(newPayloadAlarm);
-    }
-
-    if (validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
-      payloadAlarmType = 21;
-      createAlarmPark = true;
-    }
-    if (createAlarmPark) {
-      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
-      await devialarmService.createAlarm(newPayloadAlarm);
-    }
-
+    // Crear alarma según la condición si no se cumple la condición isConditionMet
+    await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti', 23);
+    await createAlarmIfValid(validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking', 21);
   }
-  if (lastRecord.length < 2) {
-    if (aux.length == 0) {
+
+  // Agregar posición a la lista si no hay duplicados
+  if (lastRecords.length < 2) {
+    if (!positions.some(x => x.delotime === delotime && x.devidelo === devidelo)) {
       positions.push(payload);
       await new Promise((resolve) => {
         setTimeout(async () => {
-          const getAdress = await getDirections(payload.delolati, payload.delolong);
+          const getAdress = await getDirections(delolati, delolong);
           payload.delodire = getAdress[0];
           payload.delobarri = getAdress[1];
           payload.delomuni = getAdress[2];
@@ -153,22 +113,18 @@ const createLocation = async (payload) => {
     } else {
       positions = [];
     }
-  } else if (lastRecord.length >= 2) {
+  } else if (lastRecords.length >= 2) {
+    // Actualizar deviloca si hay más de dos registros
     return await deviloca.update(
       {
-        delotime: payload.delotime,
-        delotinude: payload.delotinude,
-        delotinu: payload.delotinu,
-        deloacc: payload.deloacc,
-        delodoor: payload.delodoor,
-        delosigc: payload.delosigc
+        delotime, delotinude, delotinu, deloacc, delodoor, delosigc
       },
       {
-        where: { delonuid: lastRecord[0].delonuid }
+        where: { delonuid: lastRecords[0].delonuid }
       }
     );
   }
-}
+};
 
 const createPayloadAlarm = async (payload, typeIdAlarm) => {
   const getAdress = await getDirections(payload.delolati, payload.delolong);
