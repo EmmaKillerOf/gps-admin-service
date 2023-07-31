@@ -66,10 +66,10 @@ const createLocation = async (payload) => {
 
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywfunc == 'end_ralenti')) {
+    if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywcodi == 'end_ralenti')) {
       payloadAlarmType = 22;
       createAlarm = true;
-    } else if (payload.deloacc == 0 && validateEvent && validateEvent.keywfunc == 'on_ralenti') {
+    } else if (payload.deloacc == 0 && validateEvent && validateEvent.keywcodi == 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }
@@ -95,7 +95,7 @@ const createLocation = async (payload) => {
       );
     }
   } else {
-    if (validateEvent && validateEvent.keywfunc === 'on_ralenti') {
+    if (validateEvent && validateEvent.keywcodi === 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }
