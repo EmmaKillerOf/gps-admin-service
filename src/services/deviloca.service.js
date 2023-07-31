@@ -99,7 +99,7 @@ const createLocation = async (payload) => {
           delotime, delotinude, delotinu, deloacc, delodoor, delosigc
         },
         {
-          where: { delonuid: lastRecords[0].delonuid }
+          where: { delonuid: lastRecordPark[0].delonuid }
         }
       );
     }
