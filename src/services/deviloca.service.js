@@ -39,6 +39,7 @@ const createLocation = async (payload) => {
       where: {
         devideal: payload.devidelo,
       },
+      order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
       include: [
         {
           model: keywords,
@@ -48,7 +49,6 @@ const createLocation = async (payload) => {
           },
         },
       ],
-      order: [['dealtime', 'DESC']], 
       raw: true,
       nest: true,
     });

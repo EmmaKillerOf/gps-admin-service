@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(model) {
-      this.hasMany(model.keywords, {as: 'keywords', foreignKey: 'keywnuid'});
+      this.belongsTo(model.keywords, {as: 'keywords', foreignKey: 'keywnuid'});
     }
   }
   devialar.init({
