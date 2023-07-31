@@ -30,37 +30,51 @@ const createLocation = async (payload) => {
   if (valid || aux.length != 0) {
     return;
   }
-
   const isConditionMet = lastRecordPark.length === 2 &&
     lastRecordPark[0].delospee === '0' &&
     lastRecordPark[1].delospee === '0' &&
     payload.delospee === 0;
-    const validateEvent = await devialar.findOne({
-      where: {
-        devideal: payload.devidelo,
-      },
-      order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
-      include: [
-        {
-          model: keywords,
-          as: 'keywords',
-          where: {
-            [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
-          },
+  const validateEvent = await devialar.findOne({
+    where: {
+      devideal: payload.devidelo,
+    },
+    order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
+    include: [
+      {
+        model: keywords,
+        as: 'keywords',
+        where: {
+          [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
         },
-      ],
-      raw: true,
-      nest: true,
-    });
+      },
+    ],
+    raw: true,
+    nest: true,
+  });
+  const validateEventPark = await devialar.findOne({
+    where: {
+      devideal: payload.devidelo,
+    },
+    order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
+    include: [
+      {
+        model: keywords,
+        as: 'keywords',
+        where: {
+          [Op.or]: [{ keywcodi: 'on_parking' }, { keywcodi: 'end_parking' }],
+        },
+      },
+    ],
+    raw: true,
+    nest: true,
+  });
   let payloadAlarmType = 22;
-  let createAlarm = false;
-    console.log(validateEvent);
+  let createAlarm = false, createAlarmPark = false;
   if (isConditionMet) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
-
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
     if (payload.deloacc == 1 && (!validateEvent || validateEvent.keywords.keywcodi == 'end_ralenti')) {
       payloadAlarmType = 22;
@@ -69,8 +83,19 @@ const createLocation = async (payload) => {
       payloadAlarmType = 23;
       createAlarm = true;
     }
-    console.log(createAlarm);
     if (createAlarm) {
+      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
+      await devialarmService.createAlarm(newPayloadAlarm);
+    }
+
+    if (payload.deloacc == 0 && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
+      payloadAlarmType = 20;
+      createAlarmPark = true;
+    } else if (payload.deloacc == 1 && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
+      payloadAlarmType = 21;
+      createAlarmPark = true;
+    }
+    if (createAlarmPark) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
     }
@@ -95,13 +120,21 @@ const createLocation = async (payload) => {
       payloadAlarmType = 23;
       createAlarm = true;
     }
-
     if (createAlarm) {
       const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
       await devialarmService.createAlarm(newPayloadAlarm);
     }
-  }
 
+    if (validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
+      payloadAlarmType = 21;
+      createAlarmPark = true;
+    }
+    if (createAlarmPark) {
+      const newPayloadAlarm = await createPayloadAlarm(payload, payloadAlarmType);
+      await devialarmService.createAlarm(newPayloadAlarm);
+    }
+
+  }
   if (lastRecord.length < 2) {
     if (aux.length == 0) {
       positions.push(payload);
