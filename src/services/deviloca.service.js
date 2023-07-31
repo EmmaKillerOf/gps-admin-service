@@ -13,7 +13,15 @@ const createLocation = async (payload) => {
 
   // Consulta para obtener los últimos registros de ubicación
   const lastRecords = await deviloca.findAll({
-    where: { devidelo },
+    where: { devidelo, delolati, delolong },
+    order: [['delotime', 'DESC']],
+    limit: 2
+  });
+
+  const lastRecordPark = await deviloca.findAll({
+    where: {
+      devidelo: payload.devidelo,
+    },
     order: [['delotime', 'DESC']],
     limit: 2
   });
@@ -42,8 +50,6 @@ const createLocation = async (payload) => {
     nest: true,
   });
 
-  console.log(validateEvent);
-
   // Verificar si ya existe un registro válido o si hay duplicados
   const hasValidRecord = valid || positions.some(x => x.delotime === delotime && x.devidelo === devidelo);
   if (hasValidRecord) {
@@ -51,7 +57,7 @@ const createLocation = async (payload) => {
   }
 
   // Verificar si se cumple la condición para crear la alarma
-  const isConditionMet = lastRecords.length === 2 && lastRecords[0].delospee === '0' && lastRecords[1].delospee === '0' && delospee === 0;
+  const isConditionMet = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && delospee === 0;
 
   // Función para crear alarmas si la condición se cumple
   const createAlarmIfValid = async (condition, alarmType) => {
@@ -64,8 +70,8 @@ const createLocation = async (payload) => {
   if (isConditionMet) {
     const parseLat = parseFloat(delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(delolong.toString().replace(/\./g, ''));
-    const parseLatSearch = parseFloat(lastRecords[0].delolati.toString().replace(/\./g, ''));
-    const parseLonSearch = parseFloat(lastRecords[0].delolong.toString().replace(/\./g, ''));
+    const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
+    const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
     // Crear alarma según la condición
@@ -74,13 +80,13 @@ const createLocation = async (payload) => {
     } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
       await createAlarmIfValid(true, 23);
     }
-    /* if(devidelo == 10){
-      console.log(lastRecords[0]);
+    if(devidelo == 10){
+      console.log(lastRecordPark[0]);
       console.log("---------------------");
       console.log(validateEventPark);
-    } */
+    }
     
-    if (deloacc === 0 && lastRecords[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
+    if (deloacc === 0 && lastRecordPark[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
       await createAlarmIfValid(true, 20);
     } else if (deloacc === 1 && validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking') {
       await createAlarmIfValid(true, 21);
