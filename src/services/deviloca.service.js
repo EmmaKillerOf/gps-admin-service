@@ -42,6 +42,8 @@ const createLocation = async (payload) => {
     nest: true,
   });
 
+  console.log(validateEvent);
+
   // Verificar si ya existe un registro válido o si hay duplicados
   const hasValidRecord = valid || positions.some(x => x.delotime === delotime && x.devidelo === devidelo);
   if (hasValidRecord) {
@@ -72,11 +74,11 @@ const createLocation = async (payload) => {
     } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
       await createAlarmIfValid(true, 23);
     }
-    if(devidelo == 10){
+    /* if(devidelo == 10){
       console.log(lastRecords[0]);
       console.log("---------------------");
       console.log(validateEventPark);
-    }
+    } */
     
     if (deloacc === 0 && lastRecords[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
       await createAlarmIfValid(true, 20);
