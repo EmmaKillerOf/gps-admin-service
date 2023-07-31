@@ -80,11 +80,6 @@ const createLocation = async (payload) => {
     } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
       await createAlarmIfValid(true, 23);
     }
-    if(devidelo == 10){
-      console.log(lastRecordPark[0]);
-      console.log("---------------------");
-      console.log(validateEventPark);
-    }
     
     if (deloacc === 0 && lastRecordPark[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
       await createAlarmIfValid(true, 20);
