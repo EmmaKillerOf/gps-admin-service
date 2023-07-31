@@ -46,13 +46,13 @@ const createLocation = async (payload) => {
         where: {
           devideal: payload.devidelo,
         },
-        order: [['dealtime', 'DESC']],
+        order: [['dealtime', 'DESC']], // Coloca aquí la propiedad order
       },
     ],
     raw: true,
     nest: true,
   });
-
+  console.log(validateEvent);
   let payloadAlarmType = 22;
   let createAlarm = false;
 
@@ -91,7 +91,7 @@ const createLocation = async (payload) => {
       );
     }
   } else {
-    if (validateEvent && validateEvent.keywcodi === 'on_ralenti') {
+    if (validateEvent && validateEvent.keywcodi == 'on_ralenti') {
       payloadAlarmType = 23;
       createAlarm = true;
     }

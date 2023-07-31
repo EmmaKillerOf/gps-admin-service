@@ -44,7 +44,6 @@ async function pushToList(arr, listName) {
 }
 
 async function replaceList(arr, listName) {
-    console.log(arr);
     try {
    // Elimina todos los elementos de la lista en Redis
    await client.del(listName);
