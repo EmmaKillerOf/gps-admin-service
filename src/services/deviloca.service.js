@@ -45,7 +45,7 @@ const createLocation = async (payload) => {
         model: keywords,
         as: 'keywords',
         where: {
-          [Op.or]: [{ keywfunc: 'on_ralenti' }, { keywfunc: 'end_ralenti' }],
+          [Op.or]: [{ keywcodi: 'on_ralenti' }, { keywcodi: 'end_ralenti' }],
         },
       },
     ],
