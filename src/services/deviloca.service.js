@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
-  const { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu } = payload;
+  const { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc } = payload;
 
   // Consulta para verificar la validez
   const valid = await deviloca.findOne({
