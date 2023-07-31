@@ -54,7 +54,7 @@ const createLocation = async (payload) => {
     });
   let payloadAlarmType = 22;
   let createAlarm = false;
-
+    console.log(validateEvent);
   if (isConditionMet) {
     const parseLat = parseFloat(payload.delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(payload.delolong.toString().replace(/\./g, ''));
