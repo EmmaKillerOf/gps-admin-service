@@ -41,5 +41,46 @@ module.exports = (sequelize, DataTypes) => {
     tableName: 'execcomma',
     modelName: 'execcomma',
   });
+
+  /* execcomma.afterCreate((instance, options) => {
+    const observable = require('../observables/execcomma');
+    console.log("insertado en redis");
+    observable.sendCommands('listCommands')
+    .then(() => {
+      console.log('Lista de dispositivos actualizada después de actualizar un registro.');
+    })
+    .catch((error) => {
+      console.error('Error al actualizar la lista de dispositivos después de actualizar:', error);
+    });
+    // Aquí puedes realizar cualquier acción que desees después de crear un nuevo registro
+  });
+
+  // Agregar hook después de actualizar (afterUpdate)
+  execcomma.afterUpdate((instance, options) => {
+    const observable = require('../observables/execcomma');
+    console.log("actualizado en redis");
+    observable.sendCommands('listCommands')
+    .then(() => {
+      console.log('Lista de dispositivos actualizada después de actualizar un registro.');
+    })
+    .catch((error) => {
+      console.error('Error al actualizar la lista de dispositivos después de actualizar:', error);
+    });
+    // Aquí puedes realizar cualquier acción que desees después de actualizar un registro
+  });
+
+  execcomma.afterDestroy((instance, options) => {
+    // Hook después de eliminar un registro
+    // Aquí puedes realizar cualquier acción que desees después de eliminar un registro
+    const observable = require('../observables/execcomma');
+    observable.sendCommands('listCommands')
+      .then(() => {
+        console.log('Lista de dispositivos actualizada después de eliminar un registro.');
+      })
+      .catch((error) => {
+        console.error('Error al actualizar la lista de dispositivos después de eliminar:', error);
+      });
+  }); */
+
   return execcomma;
 };

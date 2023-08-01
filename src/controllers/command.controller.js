@@ -11,7 +11,7 @@ const sendCommand = async (req, res) => {
         const info = await commandService.getInfoCommand(body);
         const arrCommandsSQL = setParams(info[0], [], body, 'SQL');
         const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS');
-        /* await commandService.sendCommand(arrCommandsSQL); */
+        await commandService.sendCommand(arrCommandsSQL);
         sendCommandRedis(arrCommandsRedis);
         return res.status(200).json({
             response: "Comando enviado correctamente"
@@ -35,12 +35,9 @@ const setParams = (rows, imei, payload, use) => {
             }));
         case 'REDIS':
             return rows.map(e => ({
-                stepexec: e.stepid,
-                deviexec: payload.deviexec,
                 imei: imei.deviimei,
                 command: e.stepkey,
                 execparam: e.stepid === payload.stepexec && e.stepparam == 1 ? payload.execparam : null,
-                execacti: false,
             }));
     }
 
@@ -50,7 +47,7 @@ const sendCommandRedis = (commands) => {
     getList().then(async dataRedis => {
         console.log(dataRedis);
         commands.forEach(async e => {
-            await pushToList(e);
+            await pushToList(e, 'listCommands');
         });
     })
         .catch(error => {
