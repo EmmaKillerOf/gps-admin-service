@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'execcomma',
   });
 
-  execcomma.afterCreate((instance, options) => {
+  /* execcomma.afterCreate((instance, options) => {
     const observable = require('../observables/execcomma');
     console.log("insertado en redis");
     observable.sendCommands('listCommands')
@@ -80,7 +80,7 @@ module.exports = (sequelize, DataTypes) => {
       .catch((error) => {
         console.error('Error al actualizar la lista de dispositivos después de eliminar:', error);
       });
-  });
+  }); */
 
   return execcomma;
 };
