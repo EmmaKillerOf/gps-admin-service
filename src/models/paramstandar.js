@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(model) {
+      
     }
   }
   paramstandar.init({
@@ -38,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
     parastat:{ 
       allowNull: false,
       type:DataTypes.STRING
+     },
+     paratypecoma: { 
+      allowNull: false,
+      type:DataTypes.BOOLEAN
      },
   }, {
     sequelize,

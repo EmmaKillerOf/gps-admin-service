@@ -11,7 +11,6 @@ const redisConfig = {
 const client = new Redis(redisConfig);
 
 let listMesssages = [];
-const listKey = 'listDevices';
 
 client.on('connect', () => {
     console.log('Conectado a Redis');
@@ -62,10 +61,10 @@ async function replaceList(arr, listName) {
         throw error;
     }
 }
-async function deleteList() {
+async function deleteList(listName) {
     try {
         await new Promise((resolve, reject) => {
-            client.ltrim(listKey, 1, 0, (error, result) => {
+            client.ltrim(listName, 1, 0, (error, result) => {
                 if (error) {
                     console.error('Error trimming Redis list:', error);
                     reject(error);
@@ -81,9 +80,9 @@ async function deleteList() {
     }
 }
 
-function getList() {
+function getList(listName) {
     return new Promise(async (resolve, reject) => {
-        const value = await client.lrange(listKey, 0, -1);
+        const value = await client.lrange(listName, 0, -1);
         resolve(value);
     });
 }

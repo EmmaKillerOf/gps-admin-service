@@ -1,6 +1,6 @@
 
 const commandService = require('../services/command.service')
-const { pushToList, getList, deleteList } = require('../lib/redis');
+const { pushToList, getList } = require('../lib/redis');
 const sendCommand = async (req, res) => {
     try {
         const { body } = req;
@@ -12,7 +12,7 @@ const sendCommand = async (req, res) => {
         const arrCommandsSQL = setParams(info[0], [], body, 'SQL');
         const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS');
         await commandService.sendCommand(arrCommandsSQL);
-        sendCommandRedis(arrCommandsRedis);
+        /* sendCommandRedis(arrCommandsRedis); */
         return res.status(200).json({
             response: "Comando enviado correctamente"
         })
@@ -44,7 +44,7 @@ const setParams = (rows, imei, payload, use) => {
 };
 
 const sendCommandRedis = (commands) => {
-    getList().then(async dataRedis => {
+    getList('listCommands').then(async dataRedis => {
         console.log(dataRedis);
         commands.forEach(async e => {
             await pushToList(e, 'listCommands');

@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(model) {
       this.hasMany(model.entityUser, {as: 'entityUser', foreignKey: 'entienus'})
-      this.hasMany(model.device, {as: 'device', foreignKey: 'entidevi'})
+      this.hasMany(model.paramstandar, {as: 'paramstandar', foreignKey: 'entipara'})
     }
   }
   entity.init({
