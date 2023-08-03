@@ -72,7 +72,6 @@ const sendCommand = async (payload) => {
 }
 
 const validateRespCommand = async (device, key) => {
-  console.log(device, key);
   const results = await execcomma.findAll({
     where: {
       deviexec: device,
