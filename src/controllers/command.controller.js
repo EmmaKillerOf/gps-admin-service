@@ -45,7 +45,6 @@ const setParams = (rows, imei, payload, use) => {
 
 const sendCommandRedis = (commands) => {
     getList('listCommands').then(async dataRedis => {
-        console.log(dataRedis);
         commands.forEach(async e => {
             await pushToList(e, 'listCommands');
         });
@@ -58,5 +57,7 @@ const sendCommandRedis = (commands) => {
 
 
 module.exports = {
-    sendCommand
+    sendCommand,
+    setParams,
+    sendCommandRedis
 }

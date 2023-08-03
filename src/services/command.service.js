@@ -1,4 +1,5 @@
 const { commands, stepscommand, execcomma, device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca } = require('../models');
+const { Op, Sequelize } = require("sequelize");
 const getExistCommand = async (payload) => {
   const results = await execcomma.findOne({
     where: {
@@ -44,7 +45,7 @@ const getInfoCommand = async (payload) => {
       commstep: commids,
     },
     order:
-    [['stepid','ASC']]
+      [['stepid', 'ASC']]
   });
 
   const imei = await device.findOne({
@@ -54,7 +55,7 @@ const getInfoCommand = async (payload) => {
         model: carrdevi,
         as: 'carrdevi',
         attributes: [],
-        include:{
+        include: {
           model: carrier,
           as: 'carrier',
           attributes: []
@@ -70,8 +71,39 @@ const sendCommand = async (payload) => {
   return await execcomma.bulkCreate(payload)
 }
 
+const validateRespCommand = async (device, key) => {
+  const results = await execcomma.findAll({
+    where: {
+      deviexec: device,
+      execacti: 0
+    },
+    include: [
+      {
+        model: stepscommand,
+        as: 'stepscommand',
+        where: {
+          stepresp: key,
+        },
+        attributes: []
+      }
+    ],
+    raw: true
+  });
+  if (results.length>0) {
+    const ids = results.map((objeto) => objeto.execid);
+    await execcomma.update({ execacti: 1 }, {
+      where: {
+        execid: {
+          [Op.in]: ids
+        }
+      }
+    });
+  }
+}
+
 module.exports = {
   getInfoCommand,
   sendCommand,
-  getExistCommand
+  getExistCommand,
+  validateRespCommand
 }

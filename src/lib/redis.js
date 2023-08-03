@@ -28,10 +28,8 @@ async function pushToList(arr, listName) {
         await new Promise((resolve, reject) => {
             client.rpush(listName, JSON.stringify(arr), (error, result) => {
                 if (error) {
-                    console.error('Error pushing to Redis list:', error);
                     reject(error);
                 } else {
-                    console.log('Elemento insertado en la lista:', arr);
                     resolve(result);
                 }
             });
@@ -64,12 +62,11 @@ async function replaceList(arr, listName) {
 async function deleteList(listName) {
     try {
         await new Promise((resolve, reject) => {
-            client.ltrim(listName, 1, 0, (error, result) => {
+            client.del(listName, (error, result) => {
                 if (error) {
                     console.error('Error trimming Redis list:', error);
                     reject(error);
                 } else {
-                    console.log('Lista borrada:', result);
                     resolve(result);
                 }
             });

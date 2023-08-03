@@ -7,6 +7,7 @@ const keywordService = require('../services/keyword.service');
 const carrierService = require('../services/carrier.service');
 const deviceService = require('../services/device.service');
 const entityService = require('../services/entity.service')
+const commandService = require('../services/command.service')
 const classvalueService = require('../services/classvalue.service');
 const { ConexionTypeEnum } = require('../constants/enums');
 const { getLocationPoint } = require('../helpers/helpers')
@@ -38,15 +39,18 @@ const createLocationsFromRedis = async (req, res) => {
             await deviconeService.createConexion(payload);
             break;
           case ConexionTypeEnum.Alarm:
-            payload = await alarmMapping(info)
+            payload = await alarmMapping(info);
+            await commandService.validateRespCommand(payload.devideal, payload.keywdeal);
             await devialarmService.createAlarm(payload);
             break;
           case ConexionTypeEnum.Location:
             payload = locationMapping(info);
+            await commandService.validateRespCommand(payload.devidelo, payload.delokeyw);
             await devilocaService.createLocation(payload);
             break;
           case ConexionTypeEnum.notTypified:
             payload = notTypifiedMapping(info);
+            await commandService.validateRespCommand(payload.devinodevi, payload.devinoalarm);
             await devinoalarm.createRegister(payload);
             break;
           default:
@@ -87,14 +91,17 @@ const createLocation = async (req, res) => {
         break;
       case ConexionTypeEnum.Alarm:
         payload = await alarmMapping(body)
+        await commandService.validateRespCommand(payload.devideal, payload.keywdeal);
         await devialarmService.createAlarm(payload);
         break;
       case ConexionTypeEnum.Location:
         payload = locationMapping(body);
+        await commandService.validateRespCommand(payload.devidelo, payload.delokeyw); 
         await devilocaService.createLocation(payload);
         break;
       case ConexionTypeEnum.notTypified:
         payload = notTypifiedMapping(body);
+        await commandService.validateRespCommand(payload.devinodevi, payload.devinoalarm);
         await devinoalarm.createRegister(payload);
         break;
       default:
