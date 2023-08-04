@@ -9,8 +9,8 @@ const sendCommand = async (req, res) => {
             response: 'Este comando ya fue enviado, espere a su ejecución para el próximo envío.'
         })
         const info = await commandService.getInfoCommand(body);
-        const arrCommandsSQL = setParams(info[0], [], body, 'SQL');
-        const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS');
+        const arrCommandsSQL = setParams(info[0], [], body, 'SQL', req);
+        const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS', req);
         await commandService.sendCommand(arrCommandsSQL);
         sendCommandRedis(arrCommandsRedis);
         return res.status(200).json({
@@ -24,10 +24,11 @@ const sendCommand = async (req, res) => {
     }
 }
 
-const setParams = (rows, imei, payload, use) => {
+const setParams = (rows, imei, payload, use, req) => {
     switch (use) {
         case 'SQL':
             return rows.map(e => ({
+                execusercrea: req.uid,
                 stepexec: e.stepid,
                 deviexec: payload.deviexec,
                 execparam: e.stepid === payload.stepexec && e.stepparam == 1 ? payload.execparam : null,

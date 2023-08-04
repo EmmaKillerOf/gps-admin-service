@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type:DataTypes.BOOLEAN
      },
+     deviestacomma:{ 
+      allowNull: false,
+      type:DataTypes.BOOLEAN
+     },
   }, {
     sequelize,
     timestamps: false,

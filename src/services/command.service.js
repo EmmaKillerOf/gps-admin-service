@@ -67,14 +67,41 @@ const getInfoCommand = async (payload) => {
   return [results, imei];
 }
 
+const getInfoCommandOnly = async (payload) => {
+  // consulta final usando la subconsulta
+  const results = await stepscommand.findAll({ 
+    where: {
+      stepid: payload.stepexec,
+    },
+  });
+
+  const imei = await device.findOne({
+    where: payload.deviexec,
+    include: [
+      {
+        model: carrdevi,
+        as: 'carrdevi',
+        attributes: [],
+        include: {
+          model: carrier,
+          as: 'carrier',
+          attributes: []
+        }
+      },
+    ],
+    raw: true
+  });
+  return [results, imei];
+}
+
 const sendCommand = async (payload) => {
   return await execcomma.bulkCreate(payload)
 }
 
-const validateRespCommand = async (device, key) => {
+const validateRespCommand = async (deviceD, key) => {
   const results = await execcomma.findAll({
     where: {
-      deviexec: device,
+      deviexec: deviceD,
       execacti: 0
     },
     include: [
@@ -84,7 +111,6 @@ const validateRespCommand = async (device, key) => {
         where: {
           stepresp: key,
         },
-        attributes: []
       }
     ],
     raw: true
@@ -98,6 +124,16 @@ const validateRespCommand = async (device, key) => {
         }
       }
     });
+    const filteredArray = results.filter(obj => obj.stepscommand.stepchangstat === 1);
+    if(filteredArray.length>0){
+      const last = filteredArray[filteredArray.length-1];
+      const newStatus = last.stepscommand.deviesta;
+      await device.update({ deviestacomma: newStatus }, {
+        where: {
+          devinuid: results[0].deviexec
+        }
+      });
+    }
   }
 }
 
@@ -105,5 +141,6 @@ module.exports = {
   getInfoCommand,
   sendCommand,
   getExistCommand,
-  validateRespCommand
+  validateRespCommand,
+  getInfoCommandOnly
 }

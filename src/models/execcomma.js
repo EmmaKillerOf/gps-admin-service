@@ -20,6 +20,10 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       type:DataTypes.INTEGER
      },
+     execusercrea:{
+      allowNull: false,
+      type:DataTypes.INTEGER
+     },
      stepexec:{ 
       allowNull: false,
       type:DataTypes.INTEGER

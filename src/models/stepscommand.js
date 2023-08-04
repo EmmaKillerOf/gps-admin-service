@@ -44,6 +44,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type:DataTypes.INTEGER
      },
+     stepchangstat:{
+      allowNull: false,
+      type:DataTypes.BOOLEAN
+     },
+     deviesta:{ 
+      allowNull: false,
+      type:DataTypes.BOOLEAN
+     },
   }, {
     sequelize,
     timestamps: false,

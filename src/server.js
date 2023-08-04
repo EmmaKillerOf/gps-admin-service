@@ -1,4 +1,5 @@
 require('./config/environment');
+require('./lib/redis');
 
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -34,9 +35,9 @@ app.use(bodyParser.json())
 // CONFIGURACION GLOBAL DE RUTAS
 app.use(require('./routes/index'));
 
-app.listen(config.PORT, () => {
+app.listen(config.PORT, async () => {
     console.log('Escuchando en el port:', process.env.PORT || config.PORT);
+    await observableDevice.sendDevices('listDevices');
+    await observableCommands.sendCommands('listCommands');
 });
 
-observableDevice.sendDevices('listDevices');
-observableCommands.sendCommands('listCommands');
