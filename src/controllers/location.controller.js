@@ -191,7 +191,7 @@ const getTypeKey = async (data) => {
     }
     default: {
       if (key) {
-        await commandService.validateRespCommand(payload.devideal, payload.keywdeal);
+        await commandService.validateRespCommand(payload.devideal, key.keywcodi);
         await devialarmService.createAlarm(payload);
       } else {
         await commandService.validateRespCommand(payload.devinodevi, payload.devinoalarm);
