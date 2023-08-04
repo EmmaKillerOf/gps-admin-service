@@ -68,7 +68,6 @@ const getInfoCommand = async (payload) => {
 }
 
 const getInfoCommandOnly = async (payload) => {
-  // consulta final usando la subconsulta
   const results = await stepscommand.findAll({ 
     where: {
       stepid: payload.stepexec,
