@@ -33,7 +33,7 @@ const createLocationsFromRedis = async (req, res) => {
       })
       if (device) {
         info.push(device.devinuid);
-        switch (objeto.type) {
+        /* switch (objeto.type) {
           case ConexionTypeEnum.Conexion:
             payload = deviconeMapping(info);
             await deviconeService.createConexion(payload);
@@ -55,6 +55,15 @@ const createLocationsFromRedis = async (req, res) => {
             break;
           default:
             break;
+        } */
+        switch (objeto.type) {
+          case ConexionTypeEnum.Conexion:
+            payload = deviconeMapping(info);
+            await deviconeService.createConexion(payload);
+            break;
+          default:
+            await getTypeKey(info);
+            break;
         }
       }
     }
@@ -72,7 +81,7 @@ const createLocationsFromRedis = async (req, res) => {
   }
 }
 
-const createLocation = async (req, res) => {
+/* const createLocation = async (req, res) => {
   try {
     let body = req.body;
     let payload = {};
@@ -111,7 +120,39 @@ const createLocation = async (req, res) => {
       ok: true,
       response: {}
     })
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      error
+    })
+  }
+} */
 
+const createLocation = async (req, res) => {
+  try {
+    let body = req.body;
+    let payload = {};
+    const { connectionType, imei } = req.query;
+
+    const device = await deviceService.getDevice({
+      deviimei: imei,
+      devistat: 1
+    })
+    if (!device) throw "Dispositivo no existe";
+    body.push(device.devinuid);
+    switch (connectionType) {
+      case ConexionTypeEnum.Conexion:
+        payload = deviconeMapping(body);
+        await deviconeService.createConexion(payload);
+        break;
+      default:
+        await getTypeKey(body);
+        break;
+    }
+    res.status(200).json({
+      ok: true,
+      response: {}
+    })
   } catch (error) {
     console.log(error)
     res.status(400).json({
@@ -119,6 +160,47 @@ const createLocation = async (req, res) => {
     })
   }
 }
+
+const getTypeKey = async (data) => {
+  const typeKey = data[1] === 'tracker' ? '001' : data[1];
+  let payload, key;
+
+  switch (typeKey) {
+    case '001': {
+      payload = locationMapping(data);
+      break;
+    }
+    default: {
+      key = await keywordService.getKeyword({ keywcodi: data[1] });
+      if (key) {
+        payload = await alarmMapping(data);
+      } else {
+        payload = notTypifiedMapping(data);
+      }
+      break;
+    }
+  }
+
+  if (!payload) return;
+
+  switch (typeKey) {
+    case '001': {
+      await commandService.validateRespCommand(payload.devidelo, payload.delokeyw);
+      await devilocaService.createLocation(payload);
+      break;
+    }
+    default: {
+      if (key) {
+        await commandService.validateRespCommand(payload.devideal, payload.keywdeal);
+        await devialarmService.createAlarm(payload);
+      } else {
+        await commandService.validateRespCommand(payload.devinodevi, payload.devinoalarm);
+        await devinoalarm.createRegister(payload);
+      }
+      break;
+    }
+  }
+};
 
 const getDevicePositions = async (req, res) => {
   try {
@@ -183,23 +265,22 @@ const getLocationByCarrier = async ({ carrier, startDate, endDate, entityId }) =
   return await deviceService.getDeviceLocation({ devices: [device.devinuid], startDate, endDate })
 }
 
-
 const getDevicesByClassifier = async (classifiers) => {
   const devices = [];
   const countClassifiers = classifiers.length;
-  if(countClassifiers > 0 && classifiers[0] != -1){
+  if (countClassifiers > 0 && classifiers[0] != -1) {
     const select = 'SELECT distinct C1.deviclde';
     let from = '',
-        where = '',
-        join = '';
-        console.log(countClassifiers)
-    classifiers.map((classifier,index) => {
-      from+=`clasdevi AS C${index + 1}${(index + 1) < countClassifiers ? ',' : ''}`;
-      where+= `C${index + 1}.clvaclde IN (${classifier.toString()})${(index + 1) < countClassifiers ? ' AND ' : ''}`;
-      if(index + 2 <= countClassifiers)
-        join+= `C1.deviclde = C${index +2}.deviclde ${(index + 2) < countClassifiers ? ' AND ' : ''}`
+      where = '',
+      join = '';
+    console.log(countClassifiers)
+    classifiers.map((classifier, index) => {
+      from += `clasdevi AS C${index + 1}${(index + 1) < countClassifiers ? ',' : ''}`;
+      where += `C${index + 1}.clvaclde IN (${classifier.toString()})${(index + 1) < countClassifiers ? ' AND ' : ''}`;
+      if (index + 2 <= countClassifiers)
+        join += `C1.deviclde = C${index + 2}.deviclde ${(index + 2) < countClassifiers ? ' AND ' : ''}`
     })
-      
+
     const clasifierQuery = `${select} from ${from} where ${where} ${countClassifiers > 1 ? 'AND' : ''} ${join}`
     const [result, metadata] = await raw.query(clasifierQuery);
     devices.push(...result);
@@ -248,9 +329,9 @@ const locationMapping = (data) => {
     delotinude: getDatefromTimeAndHours(data[2]),
     delodire: '',
     delobarri: '',
-    delomuni:'',  
-    delodepa:'',
-    delopais:'',
+    delomuni: '',
+    delodepa: '',
+    delopais: '',
   }
   return payload
 }
@@ -305,9 +386,9 @@ const alarmMapping = async (data) => {
     delotinude: getDatefromTimeAndHours(data[2]),
     delodire: '',
     delobarri: '',
-    delomuni:'',  
-    delodepa:'',
-    delopais:'',
+    delomuni: '',
+    delodepa: '',
+    delopais: '',
   }
 }
 
