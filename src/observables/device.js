@@ -53,12 +53,10 @@ setInterval(async () => {
     if (JSON.stringify(newData) !== JSON.stringify(dataSQLParams) || JSON.stringify(newDataDevi) !== JSON.stringify(dataSQLDevices)) {
         sendDevices('listDevices');
         if (dataSQLParams) {
-            let differences = newData.filter((item) => {
+            let aux = newData;
+            let differences = aux.filter((item) => {
                 return !dataSQLParams.find((arrayItem) => JSON.stringify(item) === JSON.stringify(arrayItem));
             });
-            console.log(JSON.stringify(newData));
-            console.log(JSON.stringify(dataSQLParams));
-            console.log(differences);
             if (differences.length > 0) {
                 const stepsBD = await stepscommand.findAll({ raw: true });
                 const groupedArray = getUniqueByEntipara(differences);
@@ -90,15 +88,14 @@ setInterval(async () => {
                     await commandService.sendCommand(customCommandSQL);
                     commandController.sendCommandRedis(customCommandREDIS);
                 });
-                differences = [];
-                dataSQLParams = newData;
-                dataSQLDevices = newDataDevi;
             }
-
-            /* console.log(differences); */
         }
     }
-    dataSQLParams = newData;
+    const filteredArray = newData.map(obj => {
+        const { command, ...newObj } = obj;
+        return newObj;
+      });
+    dataSQLParams = filteredArray;
     dataSQLDevices = newDataDevi;
 }, 5000);
 
