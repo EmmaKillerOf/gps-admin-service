@@ -5,9 +5,9 @@ const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
   let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc } = payload;
-  /* delospee = 23;
+  /* delospee = 25;
   deloacc = 1;
-  payload.delospee = 23;
+  payload.delospee = 25;
   payload.deloacc = 1; */
   // Consulta para verificar la validez
   const valid = await deviloca.findOne({
@@ -86,7 +86,12 @@ const createLocation = async (payload) => {
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-
+    if(payload.devideal == 10){
+      console.log(payload);
+      console.log(lastRecordPark[0]);
+      console.log(validateEventPark);
+      console.log("---------------------------");
+    }
     if (deloacc === 0 && lastRecordPark[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
       await createAlarmIfValid(true, 20);
     } else if (deloacc === 1 && validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking') {
