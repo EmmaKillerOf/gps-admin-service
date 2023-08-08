@@ -69,11 +69,17 @@ const createLocation = async (payload) => {
       await devialarmService.createAlarm(newPayloadAlarm);
     }
   };
+  if(payload.devidelo == 10){
+    console.log(payload);
+    console.log(lastRecordPark[0]);
+    console.log(validateEventPark);
+    console.log("---------------------------");
+  }
 
   if(isConditionMetRalenti){
-    if (deloacc === 1 && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
+    if (deloacc === '1' && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
       await createAlarmIfValid(true, 22);
-    } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
+    } else if (deloacc === '0' && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
       await createAlarmIfValid(true, 23);
     }
   }else{
@@ -86,12 +92,6 @@ const createLocation = async (payload) => {
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    if(payload.devidelo == 10){
-      console.log(payload);
-      console.log(lastRecordPark[0]);
-      console.log(validateEventPark);
-      console.log("---------------------------");
-    }
     if (deloacc === '0' && lastRecordPark[0].deloacc === '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
       await createAlarmIfValid(true, 20);
     } else if (deloacc === '1' && validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking') {
