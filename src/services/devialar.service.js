@@ -8,21 +8,21 @@ const createAlarm = async (payload) => {
       dealtime: payload.dealtime
     }
   });
-  const lastRecord = await devialar.findAll({
+  /* const lastRecord = await devialar.findAll({
     where: {
       devideal: payload.devideal,
       deallati: payload.deallati,
       deallong: payload.deallong
     },
-    order: [['devideal', 'DESC']],
+    order: [['devideal', 'DESC'],['dealtime','desc']],
     limit: 2
-  });
+  }); */
   let aux = positions.filter(x => x.dealtime == payload.dealtime && x.devideal == payload.devideal);
   if (valid || aux.length != 0) {
     console.log('Registro duplicado. No se realizará la inserción.');
     return;
   }
-  if (lastRecord.length < 2) {
+  /* if (lastRecord.length < 2) { */
     if (aux.length == 0) {
       positions.push(payload);
       await new Promise((resolve) => {
@@ -37,12 +37,11 @@ const createAlarm = async (payload) => {
           resolve();
         }, 1100);
       });
-
     } else {
       positions = [];
     }
-  } else if (lastRecord.length >= 2) {
-    return await devialar.update(
+ /*  } */ /* else if (lastRecord.length >= 2) {
+    await devialar.update(
       {
         dealtime: payload.dealtime,
         delotinude: payload.delotinude,
@@ -52,7 +51,7 @@ const createAlarm = async (payload) => {
         where: { devideal: lastRecord[0].devideal }
       }
     );
-  }
+  } */
 }
 
 const getDirections = async (latitude, longitude) => {

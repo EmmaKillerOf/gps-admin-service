@@ -48,6 +48,9 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       {
         model: deviloca,
         as: 'deviloca',
+        where: {
+          delosign: 'F'
+        },
         separate: true, // <--- Run separate query
         order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
         limit: 1
@@ -115,6 +118,9 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
           model: deviloca,
           as: 'deviloca',
           separate: true,
+          where: {
+            delosign: 'F'
+          },
           where: {
             ...dateQuery,
           },

@@ -18,8 +18,6 @@ async function sendCommands(listName) {
                 const arrCommandsRedis = commandController.setParams(info[0], info[1], e, 'REDIS');
                 commandController.sendCommandRedis(arrCommandsRedis);
             }
-
-
         }
         const intervalTime = 60000;
         setInterval(executeQuery, intervalTime);

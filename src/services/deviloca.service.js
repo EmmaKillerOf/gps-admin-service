@@ -4,8 +4,11 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
-  const { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc } = payload;
-
+  let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc } = payload;
+  /* delospee = 23;
+  deloacc = 1;
+  payload.delospee = 23;
+  payload.deloacc = 1; */
   // Consulta para verificar la validez
   const valid = await deviloca.findOne({
     where: { devidelo, delotime }
@@ -13,7 +16,7 @@ const createLocation = async (payload) => {
 
   // Consulta para obtener los últimos registros de ubicación
   const lastRecords = await deviloca.findAll({
-    where: { devidelo, delolati, delolong },
+    where: { devidelo, delolati, delolong }, 
     order: [['delotime', 'DESC']],
     limit: 2
   });
@@ -58,7 +61,6 @@ const createLocation = async (payload) => {
 
   // Verificar si se cumple la condición para crear la alarma
   const isConditionMet = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && delospee === 0;
-
   // Función para crear alarmas si la condición se cumple
   const createAlarmIfValid = async (condition, alarmType) => {
     if (condition) {
@@ -73,11 +75,14 @@ const createLocation = async (payload) => {
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-
     // Crear alarma según la condición
+    /* console.log(deloacc);
+    console.log(validateEvent);
+    console.log(deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti'); */
     if (deloacc === 1 && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
       await createAlarmIfValid(true, 22);
     } else if (deloacc === 0 && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
+      /* console.log("Crea evento larenti"); */
       await createAlarmIfValid(true, 23);
     }
     
