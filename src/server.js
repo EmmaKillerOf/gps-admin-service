@@ -1,5 +1,6 @@
 require('./config/environment');
 require('./lib/redis');
+require('./lib/scheduler');
 
 const bodyParser = require('body-parser');
 const express = require('express');
