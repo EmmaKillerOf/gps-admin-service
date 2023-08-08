@@ -69,13 +69,6 @@ const createLocation = async (payload) => {
       await devialarmService.createAlarm(newPayloadAlarm);
     }
   };
-  if(payload.devidelo == 10){
-    console.log(payload);
-    console.log(lastRecordPark[0]);
-    console.log(validateEventPark);
-    console.log("---------------------------");
-  }
-
   if(isConditionMetRalenti){
     if (deloacc === '1' && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
       await createAlarmIfValid(true, 22);
@@ -85,7 +78,6 @@ const createLocation = async (payload) => {
   }else{
     await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti', 23);
   }
-
   if (isConditionMet) {
     const parseLat = parseFloat(delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(delolong.toString().replace(/\./g, ''));
