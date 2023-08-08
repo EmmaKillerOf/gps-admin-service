@@ -103,7 +103,8 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
           [Op.gte]: startDate + minutesStart,
           [Op.lte]: endDate + minutesEnd
         }
-      }
+      },
+      delosign: 'F'
     }
 
     const deviceResult = await device.findAll({
@@ -118,9 +119,6 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
           model: deviloca,
           as: 'deviloca',
           separate: true,
-          where: {
-            delosign: 'F'
-          },
           where: {
             ...dateQuery,
           },
