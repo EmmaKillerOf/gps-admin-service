@@ -86,7 +86,7 @@ const createLocation = async (payload) => {
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    if(payload.devideal == 10){
+    if(payload.devidelo == 10){
       console.log(payload);
       console.log(lastRecordPark[0]);
       console.log(validateEventPark);
