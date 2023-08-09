@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
-  let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc } = payload;
+  let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc, delosign } = payload;
   /* delospee = 25;
   deloacc = 1;
   payload.delospee = 25;
@@ -16,7 +16,7 @@ const createLocation = async (payload) => {
 
   // Consulta para obtener los últimos registros de ubicación
   const lastRecords = await deviloca.findAll({
-    where: { devidelo, delolati, delolong }, 
+    where: { devidelo, delolati, delolong },
     order: [['delotime', 'DESC']],
     limit: 2
   });
@@ -24,6 +24,7 @@ const createLocation = async (payload) => {
   const lastRecordPark = await deviloca.findAll({
     where: {
       devidelo: payload.devidelo,
+      delosign: 'F'
     },
     order: [['delotime', 'DESC']],
     limit: 2
@@ -63,19 +64,27 @@ const createLocation = async (payload) => {
   const isConditionMet = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && delospee === 0;
   const isConditionMetRalenti = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && delospee === 0;
   // Función para crear alarmas si la condición se cumple
-  const createAlarmIfValid = async (condition, alarmType) => {
-    if (condition) {
-      const newPayloadAlarm = await createPayloadAlarm(payload, alarmType);
+  const createAlarmIfValid = async (condition, alarmType, customPayload = null) => {
+    let newPayloadAlarm;
+    if (condition && !customPayload) {
+      newPayloadAlarm = await createPayloadAlarm(payload, alarmType, true);
+    } else if (condition && customPayload) {
+      newPayloadAlarm = await createPayloadAlarm(lastRecordPark[0], alarmType, false);
+    }
+    if (newPayloadAlarm) {
       await devialarmService.createAlarm(newPayloadAlarm);
     }
   };
-  if(isConditionMetRalenti){
+  if (delosign == 'L') {
+    await createAlarmIfValid(true, 901, true);
+  }
+  if (isConditionMetRalenti) {
     if (deloacc == '1' && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
       await createAlarmIfValid(true, 22);
     } else if (deloacc == '0' && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
       await createAlarmIfValid(true, 23);
     }
-  }else{
+  } else {
     await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti', 23);
   }
   if (isConditionMet) {
@@ -138,13 +147,15 @@ const createLocation = async (payload) => {
   }
 };
 
-const createPayloadAlarm = async (payload, typeIdAlarm) => {
-  const getAdress = await getDirections(payload.delolati, payload.delolong);
-  payload.delodire = getAdress[0];
-  payload.delobarri = getAdress[1];
-  payload.delomuni = getAdress[2];
-  payload.delodepa = getAdress[3];
-  payload.delopais = getAdress[4];
+const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) => {
+  if(getDirection){
+    const getAdress = await getDirections(payload.delolati, payload.delolong);
+    payload.delodire = getAdress[0];
+    payload.delobarri = getAdress[1];
+    payload.delomuni = getAdress[2];
+    payload.delodepa = getAdress[3];
+    payload.delopais = getAdress[4];
+  }
   return {
     devideal: payload.devidelo,
     keywdeal: typeIdAlarm,
@@ -166,7 +177,6 @@ const createPayloadAlarm = async (payload, typeIdAlarm) => {
     delopais: payload.delopais,
   };
 };
-
 
 const alarmMapping = () => {
   const latDiff = Math.abs(lat1 % 1000 - lat2 % 1000);
