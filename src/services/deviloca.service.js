@@ -76,7 +76,7 @@ const createLocation = async (payload) => {
     }
   };
   if (delosign == 'L') {
-    await createAlarmIfValid(true, 901, true);
+    await createAlarmIfValid(true, 32, true);
   }
   if (isConditionMetRalenti) {
     if (deloacc == '1' && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
