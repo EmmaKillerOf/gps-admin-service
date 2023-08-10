@@ -164,7 +164,7 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
       await createAlarmIfValid(true, 23, payload);
     }
   } else {
-    await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23);
+    await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23, payload);
   }
 };
 
@@ -178,7 +178,6 @@ const processParkingCondition = async (deloacc, lastRecordPark, validateEventPar
 
 const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) => {
   if (getDirection) {
-    console.log(payload);
     const getAdress = await getDirections(payload.delolati, payload.delolong);
     payload.delodire = getAdress[0];
     payload.delobarri = getAdress[1];
