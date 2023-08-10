@@ -1,58 +1,34 @@
-const { deviloca, devialar, keywords } = require('../models');
+const { deviloca, devialar, keywords, device } = require('../models');
 const devialarmService = require('./devialar.service');
 const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
 const createLocation = async (payload) => {
   let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc, delosign } = payload;
-  /* delospee = 25;
-  deloacc = 1;
-  payload.delospee = 25;
-  payload.deloacc = 1; */
+  /* delospee = 0;
+  deloacc = 0;
+  payload.delospee = 0;
+  payload.deloacc = 0; */
   // Consulta para verificar la validez
   const valid = await deviloca.findOne({
     where: { devidelo, delotime }
   });
 
-  // Consulta para obtener los últimos registros de ubicación
-  const lastRecords = await deviloca.findAll({
-    where: { devidelo, delolati, delolong },
-    order: [['delotime', 'DESC']],
-    limit: 2
-  });
+  const lastRecords = await findLastLocationRecords(devidelo, delolati, delolong, 2);
 
-  const lastRecordPark = await deviloca.findAll({
-    where: {
-      devidelo: payload.devidelo,
-      delosign: 'F'
-    },
-    order: [['delotime', 'DESC']],
-    limit: 2
-  });
+  const lastRecordPark = await findLastParkingRecords(payload.devidelo, 2);
 
-  // Consulta para verificar eventos en la tabla devialar
-  const validateEvent = await devialar.findOne({
-    where: {
-      devideal: devidelo,
-      [Op.or]: [{ '$keywords.keywcodi$': 'on_ralenti' }, { '$keywords.keywcodi$': 'end_ralenti' }]
-    },
-    order: [['dealtime', 'DESC']],
-    include: [{ model: keywords, as: 'keywords' }],
-    raw: true,
-    nest: true,
-  });
+  const validateEvent = await findLastEvent(devidelo, [
+    { '$keywords.keywcodi$': 'on_ralenti' },
+    { '$keywords.keywcodi$': 'end_ralenti' }
+  ]);
 
-  // Consulta para verificar eventos de estacionamiento en la tabla devialar
-  const validateEventPark = await devialar.findOne({
-    where: {
-      devideal: devidelo,
-      [Op.or]: [{ '$keywords.keywcodi$': 'on_parking' }, { '$keywords.keywcodi$': 'end_parking' }]
-    },
-    order: [['dealtime', 'DESC']],
-    include: [{ model: keywords, as: 'keywords' }],
-    raw: true,
-    nest: true,
-  });
+  const validateEventPark = await findLastEvent(devidelo, [
+    { '$keywords.keywcodi$': 'on_parking' },
+    { '$keywords.keywcodi$': 'end_parking' }
+  ]);
+
+  const validateDevice = await findDevice(devidelo);
 
   // Verificar si ya existe un registro válido o si hay duplicados
   const hasValidRecord = valid || positions.some(x => x.delotime === delotime && x.devidelo === devidelo);
@@ -60,44 +36,22 @@ const createLocation = async (payload) => {
     return;
   }
 
-  // Verificar si se cumple la condición para crear la alarma
+  // Verificar si se cumple la condición para evitar puntos cercanos de parqueo
   const isConditionMet = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && delospee === 0;
-  const isConditionMetRalenti = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && delospee === 0;
-  // Función para crear alarmas si la condición se cumple
-  const createAlarmIfValid = async (condition, alarmType, customPayload = null) => {
-    let newPayloadAlarm;
-    if (condition && !customPayload) {
-      newPayloadAlarm = await createPayloadAlarm(payload, alarmType, true);
-    } else if (condition && customPayload) {
-      newPayloadAlarm = await createPayloadAlarm(lastRecordPark[0], alarmType, false);
-    }
-    if (newPayloadAlarm) {
-      await devialarmService.createAlarm(newPayloadAlarm);
-    }
-  };
+
   if (delosign == 'L') {
-    await createAlarmIfValid(true, 32, true);
+    await createAlarmIfValid(true, 32, payload, true, lastRecordPark);
   }
-  if (isConditionMetRalenti) {
-    if (deloacc == '1' && (!validateEvent || validateEvent.keywords.keywcodi === 'end_ralenti')) {
-      await createAlarmIfValid(true, 22);
-    } else if (deloacc == '0' && validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti') {
-      await createAlarmIfValid(true, 23);
-    }
-  } else {
-    await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi === 'on_ralenti', 23);
-  }
+  await processRalentiCondition(lastRecordPark, delospee, deloacc, validateDevice, validateEvent, payload);
+
   if (isConditionMet) {
     const parseLat = parseFloat(delolati.toString().replace(/\./g, ''));
     const parseLon = parseFloat(delolong.toString().replace(/\./g, ''));
     const parseLatSearch = parseFloat(lastRecordPark[0].delolati.toString().replace(/\./g, ''));
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
-    if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi === 'end_parking')) {
-      await createAlarmIfValid(true, 20);
-    } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking') {
-      await createAlarmIfValid(true, 21);
-    }
+
+    await processParkingCondition(deloacc, lastRecordPark, validateEventPark, payload);
 
     // Actualizar deviloca si la validación se cumple
     if (validate) {
@@ -112,7 +66,7 @@ const createLocation = async (payload) => {
     }
   } else {
     // Crear alarma según la condición si no se cumple la condición isConditionMet
-    await createAlarmIfValid(validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking', 21);
+    await createAlarmIfValid(validateEventPark && validateEventPark.keywords.keywcodi === 'on_parking', 21, payload);
   }
 
   // Agregar posición a la lista si no hay duplicados
@@ -147,8 +101,83 @@ const createLocation = async (payload) => {
   }
 };
 
+const findLastLocationRecords = async (devidelo, delolati, delolong, limit) => {
+  return await deviloca.findAll({
+    where: { devidelo, delolati, delolong },
+    order: [['delotime', 'DESC']],
+    limit: limit
+  });
+};
+
+const findLastParkingRecords = async (devidelo, limit) => {
+  return await deviloca.findAll({
+    where: {
+      devidelo: devidelo,
+      delosign: 'F'
+    },
+    order: [['delotime', 'DESC']],
+    limit: limit
+  });
+};
+
+const findLastEvent = async (devideal, keywordsConditions) => {
+  return await devialar.findOne({
+    where: {
+      devideal: devideal,
+      [Op.or]: keywordsConditions
+    },
+    order: [['dealtime', 'DESC']],
+    include: [{ model: keywords, as: 'keywords' }],
+    raw: true,
+    nest: true,
+  });
+};
+
+const findDevice = async (devidelo) => {
+  return await device.findOne({
+    where: {
+      devinuid: devidelo,
+    },
+    raw: true,
+    nest: true,
+  });
+};
+
+const createAlarmIfValid = async (condition, alarmType, payload, customPayload = null, lastRecordPark) => {
+  let newPayloadAlarm;
+  if (condition && !customPayload) {
+    newPayloadAlarm = await createPayloadAlarm(payload, alarmType, true);
+  } else if (condition && customPayload) {
+    newPayloadAlarm = await createPayloadAlarm(lastRecordPark[0], alarmType, false);
+  }
+  if (newPayloadAlarm) {
+    await devialarmService.createAlarm(newPayloadAlarm);
+  }
+};
+
+const processRalentiCondition = async (lastRecordPark, delospee, deloacc, validateDevice, validateEvent, payload) => {
+  const isConditionMetRalenti = lastRecordPark.length == 2 && lastRecordPark[0].delospee == '0' && delospee == 0;
+  if (isConditionMetRalenti) {
+    if (deloacc == '1' && validateDevice && validateDevice.deviestacomma == 1 && (!validateEvent || validateEvent.keywords.keywcodi == 'end_ralenti')) {
+      await createAlarmIfValid(true, 22, payload);
+    } else if (deloacc == '0' && validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
+      await createAlarmIfValid(true, 23, payload);
+    }
+  } else {
+    await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23);
+  }
+};
+
+const processParkingCondition = async (deloacc, lastRecordPark, validateEventPark, payload) => {
+  if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
+    await createAlarmIfValid(true, 20, payload);
+  } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
+    await createAlarmIfValid(true, 21, payload);
+  }
+};
+
 const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) => {
-  if(getDirection){
+  if (getDirection) {
     const getAdress = await getDirections(payload.delolati, payload.delolong);
     payload.delodire = getAdress[0];
     payload.delobarri = getAdress[1];
