@@ -178,7 +178,7 @@ const processParkingCondition = async (deloacc, lastRecordPark, validateEventPar
 
 const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) => {
   if (getDirection) {
-    console.log(getDirection);
+    console.log(payload);
     const getAdress = await getDirections(payload.delolati, payload.delolong);
     payload.delodire = getAdress[0];
     payload.delobarri = getAdress[1];
