@@ -131,7 +131,7 @@ const workCalculateAllDevices = async (req, res) => {
   const fechaActual = new Date();
   const anio = fechaActual.getFullYear();
   const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que se suma 1
-  const dia = fechaActual.getDate();
+  const dia = fechaActual.getDate()-1;
 
   // Formatear la cadena de la fecha
   const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
