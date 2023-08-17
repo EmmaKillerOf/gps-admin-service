@@ -128,10 +128,12 @@ const toRadians = (degrees) => {
 }
 
 const workCalculateAllDevices = async (req, res) => {
-  const fechaActual = new Date();
-  const anio = fechaActual.getFullYear();
-  const mes = fechaActual.getMonth() + 1; // Los meses van de 0 a 11, por lo que se suma 1
-  const dia = fechaActual.getDate()-1;
+  
+  const currentDate = new Date();
+  currentDate.setDate(currentDate.getDate() - 1);
+  const anio = currentDate.getFullYear();
+  const mes = currentDate.getMonth() + 1; // Los meses van de 0 a 11, por lo que se suma 1
+  const dia = currentDate.getDate();
 
   // Formatear la cadena de la fecha
   const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
