@@ -1,5 +1,5 @@
 const { Op, Sequelize } = require("sequelize");
-const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca, kmdevi } = require('../models');
+const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca, kmdevi, devialar, keywords } = require('../models');
 const { getClassifier } = require("./classifier.service");
 
 const getDevices = async (entityId, available, entityUserId = null) => {
@@ -63,8 +63,6 @@ const getDevices = async (entityId, available, entityUserId = null) => {
 
   /* const classifiersDevice = await getCassifierDevice(); */
 
-
-
   return devices
 }
 
@@ -92,10 +90,22 @@ const myDevices = async (entityId, entityUserId = null) => {
   return devices
 }
 
-const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
+const POSITION_KEYWORD = "Posición";
+
+const getDateActually = () => {
+  const currentDate = new Date();
+  const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1;
+  const year = currentDate.getFullYear();
+  const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+  return formattedDate;
+}
+
+const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation, isEvent }) => {
   try {
-    let minutesStart = hasTimeIncluded(startDate, 'start');
-    let minutesEnd = hasTimeIncluded(endDate, 'end');
+    const includeArray = [];
+    const minutesStart = hasTimeIncluded(startDate, 'start');
+    const minutesEnd = hasTimeIncluded(endDate, 'end');
     const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
     const dateQuery = {
       delotinude: {
@@ -103,47 +113,143 @@ const getDeviceLocation = async ({ devices, plate, startDate, endDate }) => {
           [Op.gte]: startDate + minutesStart,
           [Op.lte]: endDate + minutesEnd
         }
-      },
-      delosign: 'F'
+      }
     }
-
-    const deviceResult = await device.findAll({
-      where: {
-        devinuid: {
-          [Op.in]: devices
-        },
-        ...plateQuery
+    if (isLocation) {
+      includeArray.push(getLocationInclude(dateQuery));
+    }
+    if (isAlarm || isEvent) {
+      includeArray.push(getAlarmInclude(dateQuery, isAlarm, isEvent));
+    }
+    includeArray.push({
+      model: carrdevi,
+      as: 'carrdevi',
+      attributes: ['cadenuid'],
+      include: {
+        model: carrier,
+        as: 'carrier',
       },
-      include: [
-        {
-          model: deviloca,
-          as: 'deviloca',
-          separate: true,
-          where: {
-            ...dateQuery,
-          },
-          order: [['delotinude', 'DESC']],
-        },
-        {
-          model: carrdevi,
-          as: 'carrdevi',
-          attributes: ['cadenuid'],
-          include: {
-            model: carrier,
-            as: 'carrier',
-          }
-        },
-      ],
-      raw: false,
-      nest: true
-    })
-
-    return deviceResult
+    });
+    const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
+    const transformedEntries = processAndTransform(deviceResult);
+    return transformedEntries;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
+};
 
+const getLocationInclude = (dateQuery) => ({
+  model: deviloca,
+  as: 'deviloca',
+  separate: true,
+  where: {
+    ...dateQuery,
+    delosign: 'F'
+  },
+  order: [['delotinude', 'DESC']],
+});
+
+const getAlarmInclude = (dateQuery, isAlarm, isEvent) => ({
+  model: devialar,
+  as: 'devialar',
+  separate: true,
+  where: {
+    ...dateQuery,
+  },
+  order: [['delotinude', 'DESC']],
+  include: [
+    {
+      model: keywords,
+      as: 'keywords',
+      attributes: ['keywfunc'],
+      where: {
+        [Op.and]: [
+          (isAlarm && isEvent) ? { keytype: 1, [Op.or]: [{ keyalarm: 1 }, { keyalarm: 0 }] } : {},
+          (!isAlarm && isEvent) ? { keyalarm: 0, keytype: 1 } : {},
+          (isAlarm && !isEvent) ? { keyalarm: 1, keytype: 1 } : {},
+        ],
+      }
+    }
+  ]
+});
+
+async function fetchDeviceData(devices, plateQuery, includeArray) {
+  return await device.findAll({
+    where: {
+      devinuid: {
+        [Op.in]: devices
+      },
+      ...plateQuery
+    },
+    include: includeArray,
+    raw: false,
+    nest: true
+  });
 }
+
+function processAndTransform(deviceResult) {
+  const allEntries = [];
+  deviceResult.forEach(device => {
+    if (device.deviloca) {
+      const devilocaEntries = device.deviloca.map(entry => ({
+        ...entry.dataValues,
+        keywords: { keywfunc: POSITION_KEYWORD },
+        source: 'deviloca'
+      }));
+      allEntries.push(...devilocaEntries);
+    }
+    if (device.devialar) {
+      const devialarEntries = device.devialar.map(entry => ({
+        ...entry.dataValues,
+        source: 'devialar'
+      }));
+      allEntries.push(...devialarEntries);
+    }
+  });
+  const transformedEntries = allEntries
+    .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
+    .map(transformEntry);
+  return transformedEntries;
+}
+
+function transformEntry(entry) {
+  const { source, ...rest } = entry;
+  if (propertyMapping[source]) {
+    const mapping = propertyMapping[source];
+    const transformedEntry = { ...rest, source };
+    for (const [oldProp, newProp] of Object.entries(mapping)) {
+      if (transformedEntry.hasOwnProperty(oldProp)) {
+        transformedEntry[newProp] = transformedEntry[oldProp];
+        delete transformedEntry[oldProp];
+      }
+    }
+    return transformedEntry;
+  }
+  return entry;
+}
+
+const propertyMapping = {
+  devialar: {
+    dealfesi: 'delofesi',
+    dealtime: 'delotime',
+    deallati: 'delolati',
+    deallong: 'delolong',
+    /*delodire: 'delodire',
+     delobarri: 'delobarri',
+    delomuni: 'delomuni',
+    delodepa: 'delodepa',
+    delopais: 'delopais', */
+    dealspee: 'delospee',
+    dealtinu: 'delotinu',
+    devideal: 'devidelo',
+    dealloor: 'deloloor',
+    deallaor: 'delolaor',
+    dealhour: 'delohour',
+    dealsign: 'delosign',
+    keywdeal: 'delokeyw',
+
+  },
+};
 
 const getDeviceAlerts = async ({ devices, plate, startDate, endDate }) => {
   try {
@@ -198,7 +304,7 @@ const getDeviceAlerts = async ({ devices, plate, startDate, endDate }) => {
 
 const hasTimeIncluded = (dateString, origin) => {
   let minutes = '';
-  if(dateString.length==10) {
+  if (dateString.length == 10) {
     switch (origin) {
       case 'start':
         minutes = ' 00:00:00';

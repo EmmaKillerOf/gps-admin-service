@@ -1,5 +1,22 @@
 const { commands, stepscommand, execcomma, device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca } = require('../models');
 const { Op, Sequelize } = require("sequelize");
+const getCommandsAvailable = async () => {
+  const results = await stepscommand.findAll({
+    attributes: [['stepid', 'stepexec'],'stepdesc','stepparam'],
+    where: {
+      stepverclien: 1
+    }
+  });
+  const modified = results.map(step => {
+    return {
+      ...step.toJSON(),
+      deviexec: 0,
+      execparam: null
+    };
+  });
+  return modified;
+}
+
 const getExistCommand = async (payload) => {
   const results = await execcomma.findOne({
     where: {
@@ -10,6 +27,7 @@ const getExistCommand = async (payload) => {
   });
   return results;
 }
+
 
 /**
  * The function `getInfoCommand` retrieves information from a database using subqueries and returns the
@@ -141,5 +159,6 @@ module.exports = {
   sendCommand,
   getExistCommand,
   validateRespCommand,
-  getInfoCommandOnly
+  getInfoCommandOnly,
+  getCommandsAvailable
 }

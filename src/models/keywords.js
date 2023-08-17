@@ -38,7 +38,15 @@ module.exports = (sequelize, DataTypes) => {
     keywminu:{ 
       allowNull: false,
       type:DataTypes.INTEGER 
-    }
+    },
+    keytype:{ 
+      allowNull: false,
+      type:DataTypes.BOOLEAN 
+    },
+    keyalarm:{ 
+      allowNull: false,
+      type:DataTypes.BOOLEAN 
+    },
   }, {
     sequelize,
     timestamps: false,

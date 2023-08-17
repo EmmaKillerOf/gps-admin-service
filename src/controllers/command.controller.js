@@ -1,21 +1,11 @@
 
 const commandService = require('../services/command.service')
 const { pushToList, getList } = require('../lib/redis');
-const sendCommand = async (req, res) => {
+
+const getCommandsAvailable = async (req, res) => {
     try {
-        const { body } = req;
-        const validate = await commandService.getExistCommand(body);
-        if (validate) return res.status(400).json({
-            response: 'Este comando ya fue enviado, espere a su ejecución para el próximo envío.'
-        })
-        const info = await commandService.getInfoCommand(body);
-        const arrCommandsSQL = setParams(info[0], [], body, 'SQL', req);
-        const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS', req);
-        await commandService.sendCommand(arrCommandsSQL);
-        sendCommandRedis(arrCommandsRedis);
-        return res.status(200).json({
-            response: "Comando enviado correctamente"
-        })
+        const results = await commandService.getCommandsAvailable();
+        return res.status(200).json(results)
     } catch (error) {
         console.log(error)
         res.status(400).json({
@@ -23,6 +13,40 @@ const sendCommand = async (req, res) => {
         })
     }
 }
+
+const sendCommand = async (body, req) => {
+    try {
+        const validate = await commandService.getExistCommand(body);
+        if (validate) return false
+        const info = await commandService.getInfoCommand(body);
+        const arrCommandsSQL = setParams(info[0], [], body, 'SQL', req);
+        const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS', req);
+        await commandService.sendCommand(arrCommandsSQL);
+        sendCommandRedis(arrCommandsRedis);
+        return true
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({
+            error
+        })
+    }
+}
+
+const sendCommandMultiple = async (req, res) => {
+    try {
+        const { body } = req;
+        for (const e of body) {
+            let result = await sendCommand(e, req);
+            e.result = result ? true : false;
+        }
+        return res.status(200).json(body);
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            error
+        });
+    }
+};
 
 const setParams = (rows, imei, payload, use, req) => {
     switch (use) {
@@ -60,5 +84,7 @@ const sendCommandRedis = (commands) => {
 module.exports = {
     sendCommand,
     setParams,
-    sendCommandRedis
+    sendCommandRedis,
+    getCommandsAvailable,
+    sendCommandMultiple
 }
