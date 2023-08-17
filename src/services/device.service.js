@@ -101,7 +101,7 @@ const getDateActually = () => {
   return formattedDate;
 }
 
-const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation, isEvent }) => {
+const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation = true, isEvent }) => {
   try {
     const includeArray = [];
     const minutesStart = hasTimeIncluded(startDate, 'start');

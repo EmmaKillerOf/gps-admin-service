@@ -19,6 +19,21 @@ const getTravelTemp = async (deviceId, dateInit, dateFinal) => {
   return result
 }
 
+const getTravelMonthly = async (deviceIds, month, year) => {
+  const results = await kmdevi.findAll({
+    attributes: ['kmdevice', [Sequelize.fn('SUM', Sequelize.col('kmcapt')), 'total_kmcapt']],
+    where: {
+      [Op.and]: [
+        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('kmdiacapt')), parseInt(month)),
+        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('kmdiacapt')), parseInt(year)),
+        { kmdevice: deviceIds } 
+      ]
+    },
+    group: ['kmdevice']
+  });
+  return results;
+}
+
 const getKmsTravel = async (latOrigin, lonOrigin, latDest, lonDest, waypoints) => {
   try {
     const response = await axios.get('https://maps.googleapis.com/maps/api/directions/json', {
@@ -59,5 +74,6 @@ module.exports = {
   getKmsTravel,
   getKmsCalculates,
   getTravelTemp,
-  createKm
+  createKm,
+  getTravelMonthly
 }

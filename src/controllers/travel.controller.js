@@ -57,6 +57,21 @@ const getTravel = async (req, res) => {
   }
 }
 
+const getTravelMonthly = async (req, res) => {
+  try {
+    const { deviceIds, month, year } = req.body;
+    const travelsCalculates = await travelService.getTravelMonthly(deviceIds, month, year);
+    return res.status(200).json({
+      response: travelsCalculates
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      error
+    });
+  }
+}
+
 const getTravelTemp = async (req, res) => {
   try {
     const { deviceId, dateInit, dateFinal } = req.params;
@@ -128,7 +143,7 @@ const toRadians = (degrees) => {
 }
 
 const workCalculateAllDevices = async (req, res) => {
-  
+
   const currentDate = new Date();
   currentDate.setDate(currentDate.getDate() - 1);
   const anio = currentDate.getFullYear();
@@ -158,5 +173,6 @@ const workCalculateAllDevices = async (req, res) => {
 module.exports = {
   getTravel,
   getTravelTemp,
-  workCalculateAllDevices
+  workCalculateAllDevices,
+  getTravelMonthly
 }
