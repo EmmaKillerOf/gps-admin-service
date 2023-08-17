@@ -11,6 +11,7 @@ const fs = require('fs')
 const config = require('./config/environment');
 const observableDevice = require('./observables/device');
 const observableCommands = require('./observables/execcomma');
+const work = require('./controllers/travel.controller');
 const https = require('https')
 const http = require('http')
 

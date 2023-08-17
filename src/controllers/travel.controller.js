@@ -3,6 +3,7 @@ const travelService = require('../services/travel.service')
 const devilocaService = require('../services/deviloca.service');
 const deviceService = require('../services/device.service');
 const dehiskmService = require('../services/dehiskm.service');
+const entityService = require('../services/entity.service');
 
 const getTravel = async (req, res) => {
   try {
@@ -152,20 +153,20 @@ const workCalculateAllDevices = async (req, res) => {
 
   // Formatear la cadena de la fecha
   const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
-
-  const devices = await deviceService.getDevices(1);
-  const datosDevice = devices.rows.map(objeto => objeto.dataValues);
-  for (let index = 0; index < datosDevice.length; index++) {
-    const e = datosDevice[index];
-    getTravel({
-      params: {
-        deviceId: e.devinuid, dateSelected: fechaFormateada
-      }
-    });
+  const entities = await entityService.getEntities();
+  for (let i = 0; i < entities.rows.length; i++) {
+    const element = entities.rows[i];
+    const devices = await deviceService.getDevices(element.entinuid);
+    const datosDevice = devices.rows.map(objeto => objeto.dataValues);
+    for (let j = 0; j < datosDevice.length; j++) {
+      const e = datosDevice[j];
+      getTravel({
+        params: {
+          deviceId: e.devinuid, dateSelected: fechaFormateada
+        }
+      });
+    }
   }
-  res.status(400).json({
-    devices
-  });
 }
 
 
