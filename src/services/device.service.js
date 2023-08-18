@@ -193,16 +193,24 @@ function processAndTransform(deviceResult) {
     if (device.deviloca) {
       const devilocaEntries = device.deviloca.map(entry => ({
         ...entry.dataValues,
-        keywords: { keywfunc: POSITION_KEYWORD },
+        keywords: { keywfunc: POSITION_KEYWORD, keytypenomb: POSITION_KEYWORD },
         source: 'deviloca'
       }));
       allEntries.push(...devilocaEntries);
     }
     if (device.devialar) {
-      const devialarEntries = device.devialar.map(entry => ({
-        ...entry.dataValues,
-        source: 'devialar'
-      }));
+      const devialarEntries = device.devialar.map(entry => {
+        const transformedEntry = {
+          ...entry.dataValues,
+          source: 'devialar'
+        };
+        if (entry.dataValues.keywords.dataValues && entry.dataValues.keywords.dataValues.keytype && entry.dataValues.keywords.dataValues.keyalarm) {
+          transformedEntry.keywords.dataValues.keytypenomb = 'alarm';
+        } else {
+          transformedEntry.keywords.dataValues.keytypenomb = 'event';
+        }
+        return transformedEntry;
+      });
       allEntries.push(...devialarEntries);
     }
   });
