@@ -161,7 +161,7 @@ const getAlarmInclude = (dateQuery, isAlarm, isEvent) => ({
     {
       model: keywords,
       as: 'keywords',
-      attributes: ['keywfunc'],
+      attributes: ['keywfunc', 'keytype', 'keyalarm'],
       where: {
         [Op.and]: [
           (isAlarm && isEvent) ? { keytype: 1, [Op.or]: [{ keyalarm: 1 }, { keyalarm: 0 }] } : {},
