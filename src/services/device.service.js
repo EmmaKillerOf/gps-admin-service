@@ -193,7 +193,7 @@ function processAndTransform(deviceResult) {
     if (device.deviloca) {
       const devilocaEntries = device.deviloca.map(entry => ({
         ...entry.dataValues,
-        keywords: { keywfunc: POSITION_KEYWORD, keytypenomb: POSITION_KEYWORD },
+        keywords: { keywfunc: 'Posición', keytypenomb: POSITION_KEYWORD },
         source: 'deviloca'
       }));
       allEntries.push(...devilocaEntries);
