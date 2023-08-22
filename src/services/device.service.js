@@ -238,6 +238,7 @@ function transformEntry(entry) {
 
 const propertyMapping = {
   devialar: {
+    dealnuid: 'delonuid',
     dealfesi: 'delofesi',
     dealtime: 'delotime',
     deallati: 'delolati',
@@ -255,7 +256,6 @@ const propertyMapping = {
     dealhour: 'delohour',
     dealsign: 'delosign',
     keywdeal: 'delokeyw',
-
   },
 };
 
