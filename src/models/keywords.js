@@ -47,6 +47,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type:DataTypes.BOOLEAN 
     },
+    keyiconame:{ 
+      allowNull: true,
+      type:DataTypes.STRING 
+    },
+    keyicoroute: { 
+      allowNull: true,
+      type:DataTypes.STRING 
+    }, 
   }, {
     sequelize,
     timestamps: false,
