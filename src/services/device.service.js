@@ -90,7 +90,7 @@ const myDevices = async (entityId, entityUserId = null) => {
   return devices
 }
 
-const POSITION_KEYWORD = "Posición";
+const POSITION_KEYWORD = "position";
 
 const getDateActually = () => {
   const currentDate = new Date();
