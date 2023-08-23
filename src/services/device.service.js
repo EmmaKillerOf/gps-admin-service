@@ -1,6 +1,7 @@
 const { Op, Sequelize } = require("sequelize");
 const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca, kmdevi, devialar, keywords } = require('../models');
 const { getClassifier } = require("./classifier.service");
+const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null) => {
   const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
@@ -131,6 +132,7 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
       },
     });
     const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
+    /* console.log(deviceResult[0]); */
     const transformedEntries = processAndTransform(deviceResult);
     return transformedEntries;
   } catch (error) {
@@ -189,7 +191,10 @@ async function fetchDeviceData(devices, plateQuery, includeArray) {
 
 function processAndTransform(deviceResult) {
   const allEntries = [];
+  let infoDevices = [];
   deviceResult.forEach(device => {
+    const { deviloca, devialar, ...rest } = device.dataValues;
+    infoDevices.push(rest);
     if (device.deviloca) {
       const devilocaEntries = device.deviloca.map(entry => ({
         ...entry.dataValues,
@@ -214,10 +219,13 @@ function processAndTransform(deviceResult) {
       allEntries.push(...devialarEntries);
     }
   });
-  const transformedEntries = allEntries
+  let transformedEntries = allEntries
     .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
     .map(transformEntry);
-  return transformedEntries;
+  infoDevices.forEach(e => {
+    e.locations = transformedEntries.filter(x=>x.devidelo == e.devinuid);
+  });
+  return infoDevices;
 }
 
 function transformEntry(entry) {
