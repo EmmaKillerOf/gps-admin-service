@@ -4,7 +4,8 @@ const getCommandsAvailable = async () => {
   const results = await stepscommand.findAll({
     attributes: [['stepid', 'stepexec'],'stepdesc','stepparam'],
     where: {
-      stepverclien: 1
+      stepverclien: 1,
+      stepparam: 0
     }
   });
   const modified = results.map(step => {
