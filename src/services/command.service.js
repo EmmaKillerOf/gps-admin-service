@@ -2,21 +2,26 @@ const { commands, stepscommand, execcomma, device, carrdevi, entityDevice, carri
 const { Op, Sequelize } = require("sequelize");
 const getCommandsAvailable = async () => {
   const results = await stepscommand.findAll({
-    attributes: [['stepid', 'stepexec'],'stepdesc','stepparam'],
+    attributes: [['stepid', 'stepexec'], 'stepdesc', 'stepparam'],
     where: {
       stepverclien: 1,
       stepparam: 0
     }
   });
-  const modified = results.map(step => {
+
+  const modified = results.map(step => {// Usar el método get() para obtener un objeto plano
     return {
-      ...step.toJSON(),
+      ...step,
       deviexec: 0,
       execparam: null
     };
   });
+
   return modified;
-}
+};
+
+
+
 
 const getExistCommand = async (payload) => {
   const results = await execcomma.findOne({
