@@ -168,11 +168,11 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
   }
 };
 
-const processParkingCondition = async (deloacc, lastRecordPark, validateEventPark, payload, lastRecords) => {
+const processParkingCondition = async (deloacc, lastRecordPark, validateEventPark, payload, lastRecordPark) => {
   if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
-    await createAlarmIfValid(true, 20, payload, true, lastRecords);
+    await createAlarmIfValid(true, 20, payload, true, lastRecordPark);
   } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
-    await createAlarmIfValid(true, 21, payload, true, lastRecords);
+    await createAlarmIfValid(true, 21, payload, true, lastRecordPark);
   }
 };
 
