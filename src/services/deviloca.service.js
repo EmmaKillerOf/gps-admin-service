@@ -51,7 +51,7 @@ const createLocation = async (payload) => {
     const parseLonSearch = parseFloat(lastRecordPark[0].delolong.toString().replace(/\./g, ''));
     const validate = calculateDifference(parseLat, parseLatSearch, parseLon, parseLonSearch, 100);
 
-    await processParkingCondition(deloacc, lastRecordPark, validateEventPark, payload, lastRecordPark);
+    await processParkingCondition(deloacc, lastRecordPark, validateEventPark, payload);
 
     // Actualizar deviloca si la validación se cumple
     if (validate) {
@@ -168,7 +168,7 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
   }
 };
 
-const processParkingCondition = async (deloacc, lastRecordPark, validateEventPark, payload, lastRecordPark) => {
+const processParkingCondition = async (deloacc, lastRecordPark, validateEventPark, payload) => {
   if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
     await createAlarmIfValid(true, 20, payload, true, lastRecordPark);
   } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
