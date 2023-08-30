@@ -142,7 +142,8 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
             [Op.lte]: endDate
           }
         }
-      }
+      },
+      separate: true
     });
     const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
     /* console.log(deviceResult[0]); */
