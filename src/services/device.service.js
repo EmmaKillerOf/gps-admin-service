@@ -147,7 +147,7 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
     const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
     /* console.log(deviceResult[0]); */
     const transformedEntries = processAndTransform(deviceResult);
-    const kmTotally = calculateKmTemp(transformedEntries, startDate, endDate);
+    const kmTotally = calculateKmTemp(transformedEntries, startDate + minutesStart, endDate + minutesEnd);
     return kmTotally;
   } catch (error) {
     console.log(error);
@@ -156,7 +156,6 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
 
 const calculateKmTemp = async (deviceResult, startDate, endDate) => {
   const { getKmTravelTemp } = require("../controllers/travel.controller");
-
   for (const e of deviceResult) {
     e.kmTotally = await getKmTravelTemp(e.devinuid, startDate, endDate);
   }
