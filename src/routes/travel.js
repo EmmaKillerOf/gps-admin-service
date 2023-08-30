@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const { verificaToken } = require('../middlewares/autenticacion');
-const { getTravel, getTravelTemp, workCalculateAllDevices, getTravelMonthly } = require('../controllers/travel.controller')
+const { getTravel, getKmTravelTemp, workCalculateAllDevices, getTravelMonthly } = require('../controllers/travel.controller')
 
 
 
@@ -11,7 +11,7 @@ const { getTravel, getTravelTemp, workCalculateAllDevices, getTravelMonthly } = 
 
 app.get('/:deviceId/:dateSelected', verificaToken, getTravel);
 
-app.get('/temp/:deviceId/:dateInit/:dateFinal', verificaToken, getTravelTemp);
+/* app.get('/temp/:deviceId/:dateInit/:dateFinal', verificaToken, getKmTravelTemp); */
 
 app.get('/work/', verificaToken, workCalculateAllDevices);
 

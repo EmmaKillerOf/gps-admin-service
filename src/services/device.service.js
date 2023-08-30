@@ -129,16 +129,40 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
       include: {
         model: carrier,
         as: 'carrier',
-      },
+      }
+    });
+    includeArray.push({
+      model: kmdevi,
+      as: 'kmdevi',
+      attributes: ['kmdiacapt', 'kmcapt'],
+      where: {
+        kmdiacapt: {
+          [Op.and]: {
+            [Op.gte]: startDate,
+            [Op.lte]: endDate
+          }
+        }
+      }
     });
     const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
     /* console.log(deviceResult[0]); */
     const transformedEntries = processAndTransform(deviceResult);
-    return transformedEntries;
+    const kmTotally = calculateKmTemp(transformedEntries, startDate, endDate);
+    return kmTotally;
   } catch (error) {
     console.log(error);
   }
 };
+
+const calculateKmTemp = async (deviceResult, startDate, endDate) => {
+  const { getKmTravelTemp } = require("../controllers/travel.controller");
+
+  for (const e of deviceResult) {
+    e.kmTotally = await getKmTravelTemp(e.devinuid, startDate, endDate);
+  }
+  return deviceResult;
+}
+
 
 const getLocationInclude = (dateQuery) => ({
   model: deviloca,
@@ -223,7 +247,7 @@ function processAndTransform(deviceResult) {
     .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
     .map(transformEntry);
   infoDevices.forEach(e => {
-    e.locations = transformedEntries.filter(x=>x.devidelo == e.devinuid);
+    e.locations = transformedEntries.filter(x => x.devidelo == e.devinuid);
   });
   return infoDevices;
 }

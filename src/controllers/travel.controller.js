@@ -73,13 +73,10 @@ const getTravelMonthly = async (req, res) => {
   }
 }
 
-const getTravelTemp = async (req, res) => {
+const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
   try {
-    const { deviceId, dateInit, dateFinal } = req.params;
     const travels = await travelService.getTravelTemp(deviceId, dateInit, dateFinal);
-
     let DistanceTotal = 0;
-
     if (travels.length > 0) {
       for (let i = 0; i < travels.length - 1; i++) {
         const punto1 = travels[i];
@@ -93,15 +90,37 @@ const getTravelTemp = async (req, res) => {
       }
     }
     DistanceTotal = Math.ceil(DistanceTotal);
-    res.status(200).json({
-      response: DistanceTotal
-    });
+    return DistanceTotal;
   } catch (error) {
     console.log(error);
     res.status(400).json({
       error
     });
   }
+}
+
+const hasTimeIncluded = (dateString, origin) => {
+  let minutes = '';
+  if (dateString.length == 10) {
+    switch (origin) {
+      case 'start':
+        minutes = ' 00:00:00';
+        break;
+      case 'end':
+        minutes = ' 23:59:59';
+        break;
+    }
+  }
+  return minutes;
+}
+
+const getDateActually = () => {
+  const currentDate = new Date();
+  const day = currentDate.getDate();
+  const month = currentDate.getMonth() + 1;
+  const year = currentDate.getFullYear();
+  const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+  return formattedDate;
 }
 
 /* function splitArray(array, chunkSize) {
@@ -171,7 +190,7 @@ const workCalculateAllDevices = async (req, res) => {
 
 module.exports = {
   getTravel,
-  getTravelTemp,
+  getKmTravelTemp,
   workCalculateAllDevices,
   getTravelMonthly
 }
