@@ -1,6 +1,6 @@
 const { Op, Sequelize } = require('sequelize');
 const axios = require('axios');
-const { kmdevi } = require('../models');
+const { kmdevi, device, carrdevi, carrier } = require('../models');
 
 const config = require('../config/environment')
 const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
@@ -20,17 +20,40 @@ const getTravelTemp = async (deviceId, dateInit, dateFinal) => {
 }
 
 const getTravelMonthly = async (deviceIds, month, year) => {
-  const results = await kmdevi.findAll({
-    attributes: ['kmdevice', [Sequelize.fn('SUM', Sequelize.col('kmcapt')), 'total_kmcapt']],
+  const results = await device.findAll({
+    attributes: ['devinuid', 'deviimei'],
     where: {
-      [Op.and]: [
-        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('kmdiacapt')), parseInt(month)),
-        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('kmdiacapt')), parseInt(year)),
-        { kmdevice: deviceIds } 
-      ]
+      devinuid: deviceIds
     },
-    group: ['kmdevice']
+    include: [
+      {
+        model: carrdevi,
+        as: 'carrdevi',
+        attributes: ['cadenuid'],
+        include: {
+          model: carrier,
+          as: 'carrier',
+        }
+      },
+      {
+        model: kmdevi,
+        as: 'kmdevi',
+        attributes: ['kmdevice', [Sequelize.fn('SUM', Sequelize.col('kmcapt')), 'total_kmcapt']],
+        where: {
+          [Op.and]: [
+            Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('kmdiacapt')), parseInt(month)),
+            Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('kmdiacapt')), parseInt(year)),
+            //{ kmdevice: deviceIds }
+          ]
+        },
+        group: ['kmdevice'],
+        separate: true
+      }
+    ],
+    raw: false,
+    nest: true
   });
+  console.log(results);
   return results;
 }
 
@@ -59,14 +82,14 @@ const getKmsCalculates = async (deviceId, dateSelected) => {
       kmdevice: deviceId,
       kmdiacapt: dateSelected
     },
-    raw : false,
-    nest : true
+    raw: false,
+    nest: true
   })
   return kmsTemp
 }
 
 const createKm = async (payload) => {
-  return await kmdevi.create({...payload})
+  return await kmdevi.create({ ...payload })
 }
 
 module.exports = {
