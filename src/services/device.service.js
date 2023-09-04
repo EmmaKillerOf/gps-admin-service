@@ -69,6 +69,42 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       },
     },
     order: [['devinuid', 'DESC']],
+    include: [
+      {
+        model: carrdevi,
+        as: 'carrdevi',
+        attributes: ['cadenuid'],
+        include: {
+          model: carrier,
+          as: 'carrier',
+        }
+      },
+      {
+        model: clasdevi,
+        as: 'clasdevi',
+        include: {
+          model: classvalue,
+          as: 'classvalue'
+        }
+      },
+      {
+        model: kmdevi,
+        as: 'kmdevi',
+        order: [['kmdiacapt', 'DESC']],
+        limit: 1
+      },
+      {
+        model: deviloca,
+        as: 'deviloca',
+        where: {
+          delosign: 'F'
+        },
+        separate: true, // <--- Run separate query
+        order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
+        limit: 1
+      },
+      ...includes,
+    ],
     raw: true,
     nest: true
   });
