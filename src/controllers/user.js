@@ -48,7 +48,7 @@ const createUser = async (req, res) => {
         user = await userService.getUser({ username: email })
         const passwordGenerated = generatePassword();
         const passwordEncrypted = await encryptPassword(passwordGenerated);
-        console.log({passwordGenerated,passwordEncrypted})
+        
         const userPayload = {
             username: email,
             userpass: passwordEncrypted,
@@ -132,7 +132,7 @@ const deleteUser = async (req, res) => {
         const entityUser = await entityService.getEntityUser({ userenus: userId, entienus: entityId });
         await privilegesService.deleteUserPrivileges(entityUser.enusnuid)
         await entityService.deleteEntityUser(userId, entityId);
-        // await userService.deleteUser(userId)
+        await userService.deleteUser(userId)
         res.status(200).json({
             ok: true,
             message: 'Usuario eliminado'
