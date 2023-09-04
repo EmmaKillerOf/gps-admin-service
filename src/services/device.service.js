@@ -58,13 +58,30 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       },
       ...includes,
     ],
-    raw: false,
+    raw: true,
     nest: true
   })
-
-  /* const classifiersDevice = await getCassifierDevice(); */
-
-  return devices
+  const devicesAllEntityDistinct = await device.findAndCountAll({
+    where: {
+      entidevi: entityId,
+      devinuid: {
+        [Op.notIn]: devices.rows.map(device => device.devinuid),
+      },
+    },
+    order: [['devinuid', 'DESC']],
+    raw: true,
+    nest: true
+  });
+  const devicesWithCheck = devices.rows.map(device => ({
+    ...device,
+    check: true,
+  }));
+  const devicesAllEntityDistinctWithCheck = devicesAllEntityDistinct.rows.map(device => ({
+    ...device,
+    check: false,
+  }));
+  let combinedDevices = devicesWithCheck.concat(devicesAllEntityDistinctWithCheck);
+  return {rows: combinedDevices};
 }
 
 const myDevices = async (entityId, entityUserId = null) => {

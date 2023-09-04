@@ -66,7 +66,7 @@ const createUser = async (req, res) => {
             entienus: entityId,
             enusrole: 'USER'
         }
-        const entityUser = await entityService.createEntityUser(entityUserPayload);
+        const entityUser = await entityService.createEntityUser(entityUserPayload); 
 
         if(privileges && privileges.length) {
             const permissionPromises = []
