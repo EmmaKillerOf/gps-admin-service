@@ -79,7 +79,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   combinedDevices = {
     rows: [...devices.rows]
   };
-  if (userSelectedId == 'null' && secondEntityUserId == null) {
+  if (userSelectedId != 'null') {
     const devicesAllEntityDistinct = await device.findAndCountAll({
       where: {
         entidevi: entityId,
