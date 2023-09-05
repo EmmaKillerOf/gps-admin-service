@@ -44,18 +44,19 @@ const getDevices = async (req, res) => {
     try {
         const { available, limit, offset } = req.query;
         const { entityId, userSelectedId } = req.params;
-        const userId = userSelectedId !== 'null' ? userSelectedId : req.uid;
+        const userId = userSelectedId != 'null' ? userSelectedId : req.uid;
         let devices;
-        if (userSelectedId !== 'null') {
-            const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId });
-            if (!entityUser) {
-                throw "Este usuario no tiene entidades asociadas";
-            }
-            const enusnuid = entityUser.enusrole === 'ADMIN' ? null : entityUser.enusnuid;
-            devices = await deviceService.getDevices(entityId, available, enusnuid, userSelectedId);
-        } else {
-            devices = await deviceService.getDevices(entityId, available, null, userSelectedId);
+
+        const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId });
+        if (!entityUser) {
+            throw "Este usuario no tiene entidades asociadas";
         }
+        const enusnuid = entityUser.enusrole === 'ADMIN' ? null : entityUser.enusnuid;
+        devices = await deviceService.getDevices(entityId, available, enusnuid, userSelectedId, entityUser.enusnuid);
+
+        /* else {
+            devices = await deviceService.getDevices(entityId, available, null, userSelectedId);
+        } */
 
         res.status(200).json({
             ok: true,

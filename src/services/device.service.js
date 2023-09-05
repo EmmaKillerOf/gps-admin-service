@@ -3,7 +3,7 @@ const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca,
 const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
-const getDevices = async (entityId, available, entityUserId = null, userSelectedId = null) => {
+const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null) => {
   const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const includes = entityUserId ? [
@@ -23,8 +23,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     'devistat',
     'deviestacomma'
   ];
-  if (userSelectedId == 'null' && entityUserId == null ? attributes.push([Sequelize.literal('false'), 'check']) : attributes.push([Sequelize.literal('true'), 'check']));
-
+  let combinedDevices = { rows: [] };
+  if (userSelectedId == 'null' ? attributes.push([Sequelize.literal('false'), 'check']) : attributes.push([Sequelize.literal('true'), 'check']));
   const order = [['devinuid', 'DESC']];
 
   const commonInclude = [
@@ -76,27 +76,32 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     raw: false,
     nest: true
   });
-
-  const devicesAllEntityDistinct = await device.findAndCountAll({
-    where: {
-      entidevi: entityId,
-      devinuid: {
-        [Op.notIn]: devices.rows.map(device => device.devinuid),
-      },
-    },
-    attributes: [
-      ...attributes.slice(0, -1), // Use the same attributes except 'check'
-      [Sequelize.literal('false'), 'check']
-    ],
-    order,
-    include: commonInclude,
-    raw: false,
-    nest: true
-  });
-  let combinedDevices = {
-    rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
+  combinedDevices = {
+    rows: [...devices.rows]
   };
+  if (userSelectedId == 'null' && secondEntityUserId == null) {
+    const devicesAllEntityDistinct = await device.findAndCountAll({
+      where: {
+        entidevi: entityId,
+        devinuid: {
+          [Op.notIn]: devices.rows.map(device => device.devinuid),
+        },
+      },
+      attributes: [
+        ...attributes.slice(0, -1), // Use the same attributes except 'check'
+        [Sequelize.literal('false'), 'check']
+      ],
+      order,
+      include: commonInclude,
+      raw: false,
+      nest: true
+    });
+    combinedDevices = {
+      rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
+    };
+  }
   combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
+
   return combinedDevices;
 }
 
