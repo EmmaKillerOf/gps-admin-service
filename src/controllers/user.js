@@ -25,8 +25,7 @@ const getUser = async (req, res) => {
             usersFiltrered = users.rows.filter(user => user.usernuid != userId)
 
         const response = usersFiltrered || privileges
-
-
+        
         res.status(200).json({
             ok: true,
             response

@@ -11,37 +11,28 @@ const getUserPrivilegies = async (userId, entityId) => {
   });
 }
 
-const getUsersEntity = async (entityId, pagination={}) => {
-
+const getUsersEntity = async (entityId, pagination = {}) => {
   const users = await User.findAndCountAll({
-    attributes: ['fullname', 'username', 'usernuid', 'usersupe','userpassshow'],
-    order:[['usernuid', 'DESC']],
-    include:{
+    attributes: ['fullname', 'username', 'usernuid', 'usersupe', 'userpassshow'],
+    order: [['usernuid', 'DESC']],
+    include: {
       model: entityUser,
       as: 'entityUser',
       where: {
-        entienus: entityId
+        entienus: entityId,
       },
-      order:[
-        ['usernuid', 'DESC']
-      ],
-      attributes: ['enusstat','entienus'],
-      // include:{
-      //   model: userpriv,
-      //   as: 'userpriv',
-      //   attributes:['privuspr'],
-      //   include:{
-      //     model: privileges,
-      //     as: 'privileges',
-      //   }
-      // }
+      order: [['usernuid', 'DESC']],
+      attributes: ['enusstat', 'entienus'],
     },
-    raw : false ,
-    nest : true
+    raw: true, // Devuelve objetos planos en lugar de instancias de modelos
+    nest: true, // Permite que las propiedades se aniden bajo el modelo principal
+  });
 
-  })
-  return users
-}
+  // Ahora puedes acceder a las propiedades de entityUser directamente en cada fila
+  console.log(users);
+
+  return users;
+};
 
 const getUser = async (query) => {
   const user = await User.findOne({
