@@ -14,7 +14,7 @@ const getUserPrivilegies = async (userId, entityId) => {
 const getUsersEntity = async (entityId, pagination={}) => {
 
   const users = await User.findAndCountAll({
-    attributes: ['fullname', 'username', 'usernuid', 'usersupe'],
+    attributes: ['fullname', 'username', 'usernuid', 'usersupe','userpassshow'],
     order:[['usernuid', 'DESC']],
     include:{
       model: entityUser,

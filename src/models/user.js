@@ -33,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       type:DataTypes.STRING
     },
+    userpassshow:{
+      allowNull: false,
+      type:DataTypes.STRING
+    },
     usersupe:{
       allowNull: false,
       defaultValue:false, 
