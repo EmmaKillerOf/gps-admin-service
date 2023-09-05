@@ -10,57 +10,74 @@ const getDevices = async (entityId, available, entityUserId = null) => {
     {
       model: entityDevice,
       as: 'entityDevice',
-      attributes: []
+      attributes: [],
     }
   ] : []
+
+  const attributes = [
+    'devinuid',
+    'entidevi',
+    'deviimei',
+    'devimark',
+    'devimode',
+    'deviphon',
+    'devistat',
+    'deviestacomma',
+    [Sequelize.literal('true'), 'check']
+  ];
+
+  const order = [['devinuid', 'DESC']];
+
+  const commonInclude = [
+    {
+      model: carrdevi,
+      as: 'carrdevi',
+      attributes: ['cadenuid'],
+      include: {
+        model: carrier,
+        as: 'carrier',
+      }
+    },
+    {
+      model: clasdevi,
+      as: 'clasdevi',
+      include: {
+        model: classvalue,
+        as: 'classvalue'
+      }
+    },
+    {
+      model: kmdevi,
+      as: 'kmdevi',
+      order: [['kmdiacapt', 'DESC']],
+      limit: 1
+    },
+    {
+      model: deviloca,
+      as: 'deviloca',
+      where: {
+        delosign: 'F'
+      },
+      separate: true,
+      order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
+      limit: 1
+    },
+    ...includes,
+  ];
+
   const devices = await device.findAndCountAll({
     where: {
       entidevi: entityId,
       ...query,
       ...availableQuery
     },
-    order: [
-      ['devinuid', 'DESC'],
-    ],
-    include: [
-      {
-        model: carrdevi,
-        as: 'carrdevi',
-        attributes: ['cadenuid'],
-        include: {
-          model: carrier,
-          as: 'carrier',
-        }
-      },
-      {
-        model: clasdevi,
-        as: 'clasdevi',
-        include: {
-          model: classvalue,
-          as: 'classvalue'
-        }
-      },
-      {
-        model: kmdevi,
-        as: 'kmdevi',
-        order: [['kmdiacapt', 'DESC']],
-        limit: 1
-      },
-      {
-        model: deviloca,
-        as: 'deviloca',
-        where: {
-          delosign: 'F'
-        },
-        separate: true, // <--- Run separate query
-        order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
-        limit: 1
-      },
-      ...includes,
-    ],
-    raw: true,
+    attributes,
+    order,
+    include: commonInclude,
+    raw: false,
     nest: true
-  })
+  });
+
   const devicesAllEntityDistinct = await device.findAndCountAll({
     where: {
       entidevi: entityId,
@@ -68,56 +85,22 @@ const getDevices = async (entityId, available, entityUserId = null) => {
         [Op.notIn]: devices.rows.map(device => device.devinuid),
       },
     },
-    order: [['devinuid', 'DESC']],
-    include: [
-      {
-        model: carrdevi,
-        as: 'carrdevi',
-        attributes: ['cadenuid'],
-        include: {
-          model: carrier,
-          as: 'carrier',
-        }
-      },
-      {
-        model: clasdevi,
-        as: 'clasdevi',
-        include: {
-          model: classvalue,
-          as: 'classvalue'
-        }
-      },
-      {
-        model: kmdevi,
-        as: 'kmdevi',
-        order: [['kmdiacapt', 'DESC']],
-        limit: 1
-      },
-      {
-        model: deviloca,
-        as: 'deviloca',
-        where: {
-          delosign: 'F'
-        },
-        separate: true, // <--- Run separate query
-        order: [['delotinu', 'DESC'], ['delotime', 'DESC']],
-        limit: 1
-      },
-      ...includes,
+    attributes: [
+      ...attributes.slice(0, -1), // Use the same attributes except 'check'
+      [Sequelize.literal('false'), 'check']
     ],
-    raw: true,
+    order,
+    include: commonInclude,
+    raw: false,
     nest: true
   });
-  const devicesWithCheck = devices.rows.map(device => ({
-    ...device,
-    check: true,
-  }));
-  const devicesAllEntityDistinctWithCheck = devicesAllEntityDistinct.rows.map(device => ({
-    ...device,
-    check: false,
-  }));
-  let combinedDevices = devicesWithCheck.concat(devicesAllEntityDistinctWithCheck);
-  return {rows: combinedDevices};
+
+  const combinedDevices = {
+    rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
+  };
+
+  return combinedDevices;
+
 }
 
 const myDevices = async (entityId, entityUserId = null) => {
