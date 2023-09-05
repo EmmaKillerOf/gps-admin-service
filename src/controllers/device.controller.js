@@ -42,12 +42,15 @@ const createDevice = async (req, res) => {
 
 const getDevices = async (req, res) => {
     try {
-        let userId = req.uid;
         const { available, limit, offset } = req.query;
         const { entityId, userSelectedId } = req.params;
-        if (userSelectedId) userId = userSelectedId;
-        const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId })
-        if (!entityUser) throw "Este usuario no tiene entidades asociadas"
+        const userId = userSelectedId !== 'null' ? userSelectedId : req.uid;
+
+        const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId });
+
+        if (!entityUser) {
+            throw "Este usuario no tiene entidades asociadas";
+        }
 
         let devices
         if (entityUser.enusrole === 'ADMIN') {
