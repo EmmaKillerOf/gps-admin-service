@@ -21,11 +21,22 @@ const getUser = async (req, res) => {
             users = await userService.getUsersEntity(entityId);
         }
 
-        if (users)
-            usersFiltrered = users.rows.filter(user => user.usernuid != userId)
+        if (users){
+            usersFiltrered = users.filter(user => user.usernuid != userId)
+            usersFiltrered = usersFiltrered.map(convertCheckValue);
+            function convertCheckValue(obj) {
+                if (obj.entityUser.enusstat === 1) {
+                  obj.entityUser.enusstat = true;
+                } else if (obj.entityUser.enusstat === 0) {
+                  obj.entityUser.enusstat = false;
+                }
+                return obj;
+              }
+        }
+            
 
         const response = usersFiltrered || privileges
-        
+
         res.status(200).json({
             ok: true,
             response
