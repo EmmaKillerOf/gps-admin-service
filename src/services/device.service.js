@@ -95,12 +95,22 @@ const getDevices = async (entityId, available, entityUserId = null) => {
     nest: true
   });
 
-  const combinedDevices = {
+  let combinedDevices = {
     rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
   };
+  combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
 
   return combinedDevices;
 
+}
+
+function convertCheckValue(obj) {
+  if (obj.dataValues.check === 1) {
+    obj.dataValues.check = true;
+  } else if (obj.check === 0) {
+    obj.dataValues.check = false;
+  }
+  return obj;
 }
 
 const myDevices = async (entityId, entityUserId = null) => {
