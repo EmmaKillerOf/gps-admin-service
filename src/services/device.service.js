@@ -3,7 +3,7 @@ const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca,
 const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
-const getDevices = async (entityId, available, entityUserId = null) => {
+const getDevices = async (entityId, available, entityUserId = null, userSelectedId = null) => {
   const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const includes = entityUserId ? [
@@ -13,7 +13,6 @@ const getDevices = async (entityId, available, entityUserId = null) => {
       attributes: [],
     }
   ] : []
-
   const attributes = [
     'devinuid',
     'entidevi',
@@ -22,9 +21,9 @@ const getDevices = async (entityId, available, entityUserId = null) => {
     'devimode',
     'deviphon',
     'devistat',
-    'deviestacomma',
-    [Sequelize.literal('true'), 'check']
+    'deviestacomma'
   ];
+  if (userSelectedId == 'null' && entityUserId == null ? attributes.push([Sequelize.literal('false'), 'check']) : attributes.push([Sequelize.literal('true'), 'check']));
 
   const order = [['devinuid', 'DESC']];
 
@@ -94,20 +93,17 @@ const getDevices = async (entityId, available, entityUserId = null) => {
     raw: false,
     nest: true
   });
-
   let combinedDevices = {
     rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
   };
   combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
-
   return combinedDevices;
-
 }
 
 function convertCheckValue(obj) {
   if (obj.dataValues.check === 1) {
     obj.dataValues.check = true;
-  } else if (obj.check === 0) {
+  } else if (obj.dataValues.check === 0) {
     obj.dataValues.check = false;
   }
   return obj;
