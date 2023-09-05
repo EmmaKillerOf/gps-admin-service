@@ -41,6 +41,6 @@ app.listen(config.PORT, async () => {
     console.log('Escuchando en el port:', process.env.PORT || config.PORT);
     await observableDevice.sendDevices('listDevices');
     await observableCommands.sendCommands('listCommands');
-    work.workCalculateAllDevices();
+    /* work.workCalculateAllDevices(); */
 });
 
