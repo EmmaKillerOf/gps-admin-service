@@ -7,7 +7,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   console.log(entityUserSession);
   let query = {}
   if (userSelectedId != 'null' && entityUserSession.enusrole != 'ADMIN') {
-    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
+    query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
   }else if(userSelectedId == 'null' && entityUserSession.enusrole != 'ADMIN'){
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }else if(userSelectedId != 'null' && entityUserSession.enusrole == 'ADMIN'){
