@@ -8,7 +8,10 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   let query = {}
   if (userSelectedId != 'null' && entityUserSession.enusrole != 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
+  }else if(userSelectedId == 'null'){
+    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
+  console.log(query);
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN' ? {
     [Op.or]: [
@@ -16,8 +19,6 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
       { '$entityDevice.userende$': secondEntityUserId.enusnuid },
     ],
   } : {};
-  console.log(secondEntityUserId);
-  console.log(entityUserSession);
   const includes = secondEntityUserId ? [
     {
       model: entityDevice,
@@ -75,7 +76,6 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     },
     ...includes,
   ];
-  console.log(queryUser);
   const devices = await device.findAndCountAll({
     where: {
       entidevi: entityId,
