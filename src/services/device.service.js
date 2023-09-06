@@ -4,14 +4,16 @@ const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
-  const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
+  console.log(entityUserSession);
+  const query = userSelectedId != 'null' ? { '$entityDevice.userende$': entityUserSession.enusnuid } : {
+
+  }
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole != 'ADMIN' ? {
-    [Op.or]: [
-      { '$entityDevice.userende$': secondEntityUserId.enusnuid },
-      { '$entityDevice.userende$': entityUserSession.enusnuid },
-    ]
+    '$entityDevice.userende$': entityUserId
   } : {};
+  console.log(secondEntityUserId);
+  console.log(entityUserSession);
   const includes = secondEntityUserId ? [
     {
       model: entityDevice,
@@ -69,11 +71,12 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     },
     ...includes,
   ];
-
+  console.log(queryUser);
   const devices = await device.findAndCountAll({
     where: {
       entidevi: entityId,
       ...query,
+      //...queryUser,
       ...availableQuery
     },
     attributes,
@@ -85,14 +88,14 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   combinedDevices = {
     rows: [...devices.rows]
   };
-  if (userSelectedId != 'null') {
+  /* if (userSelectedId != 'null') {
     const devicesAllEntityDistinct = await device.findAndCountAll({
       where: {
         entidevi: entityId,
         devinuid: {
           [Op.notIn]: devices.rows.map(device => device.devinuid),
         },
-        ...queryUser,
+        //...queryUser
       },
       attributes: [
         ...attributes.slice(0, -1), // Use the same attributes except 'check'
@@ -106,7 +109,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     combinedDevices = {
       rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
     };
-  }
+  } */
   combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
 
   return combinedDevices;
@@ -120,7 +123,7 @@ function convertCheckValue(obj) {
   }
   return obj;
 }
-
+/* 
 const myDevices = async (entityId, entityUserId = null) => {
   const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const includes = entityUserId ? [
@@ -143,7 +146,7 @@ const myDevices = async (entityId, entityUserId = null) => {
     nest: true
   })
   return devices
-}
+} */
 
 const POSITION_KEYWORD = "position";
 
