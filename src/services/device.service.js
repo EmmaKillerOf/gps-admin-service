@@ -3,10 +3,17 @@ const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca,
 const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
-const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null) => {
+const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
   const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
-  const includes = entityUserId ? [
+  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole != 'ADMIN' ? {
+    [Op.or]: [
+      { '$entityDevice.userende$': secondEntityUserId.enusnuid },
+      { '$entityDevice.userende$': entityUserSession.enusnuid },
+    ]
+  } : {};
+  console.log(queryUser);
+  const includes = secondEntityUserId ? [
     {
       model: entityDevice,
       as: 'entityDevice',
@@ -27,7 +34,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   if (userSelectedId == 'null' ? attributes.push([Sequelize.literal('false'), 'check']) : attributes.push([Sequelize.literal('true'), 'check']));
   const order = [['devinuid', 'DESC']];
 
-  const commonInclude = [
+  let commonInclude = [
     {
       model: carrdevi,
       as: 'carrdevi',
@@ -79,13 +86,14 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   combinedDevices = {
     rows: [...devices.rows]
   };
-  if (userSelectedId != 'null' && secondEntityUserId == null) {
+  if (userSelectedId != 'null') {
     const devicesAllEntityDistinct = await device.findAndCountAll({
       where: {
         entidevi: entityId,
         devinuid: {
           [Op.notIn]: devices.rows.map(device => device.devinuid),
         },
+        ...queryUser
       },
       attributes: [
         ...attributes.slice(0, -1), // Use the same attributes except 'check'
