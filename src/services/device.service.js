@@ -8,7 +8,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole != 'ADMIN' ? {
     [Op.or]: [
-      { '$entityDevice.userende$': secondEntityUserId.enusnuid },
+      //{ '$entityDevice.userende$': secondEntityUserId.enusnuid },
       { '$entityDevice.userende$': entityUserSession.enusnuid },
     ]
   } : {};
