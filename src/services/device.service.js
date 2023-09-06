@@ -4,16 +4,18 @@ const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
-  const query = entityUserId ? { '$entityDevice.userende$': entityUserId } : {}
+  let query = {};
+  if (userSelectedId != 'null' && entityUserSession.enusrole !== 'ADMIN') {
+    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
+  } else if(userSelectedId ) {
+    query = {}
+  } 
+  console.log(query);
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
-  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole != 'ADMIN' ? {
-    [Op.or]: [
-      //{ '$entityDevice.userende$': secondEntityUserId.enusnuid },
-      { '$entityDevice.userende$': entityUserSession.enusnuid },
-    ]
+  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN' ? {
+    '$entityDevice.userende$': entityUserSession.enusnuid
   } : {};
-  console.log(queryUser);
-  const includes = secondEntityUserId ? [
+  const includes = userSelectedId != 'null' ? [
     {
       model: entityDevice,
       as: 'entityDevice',
@@ -93,7 +95,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
         devinuid: {
           [Op.notIn]: devices.rows.map(device => device.devinuid),
         },
-        ...queryUser
+        ...queryUser,
       },
       attributes: [
         ...attributes.slice(0, -1), // Use the same attributes except 'check'
