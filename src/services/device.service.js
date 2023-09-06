@@ -7,9 +7,9 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   let query = {};
   if (userSelectedId != 'null' && entityUserSession.enusrole !== 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  } else if(userSelectedId ) {
-    query = {}
-  } 
+  } else if(userSelectedId){
+    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
+  }
   console.log(query);
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
   const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN' ? {
