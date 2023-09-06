@@ -5,12 +5,16 @@ const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
   console.log(entityUserSession);
-  const query = userSelectedId != 'null' ? { '$entityDevice.userende$': entityUserSession.enusnuid } : {
-
+  let query = {}
+  if (userSelectedId != 'null' && entityUserSession.enusrole != 'ADMIN') {
+    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
-  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole != 'ADMIN' ? {
-    '$entityDevice.userende$': entityUserId
+  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN' ? {
+    [Op.or]: [
+      //{ '$entityDevice.userende$': entityUserSession.enusnuid },
+      { '$entityDevice.userende$': secondEntityUserId.enusnuid },
+    ],
   } : {};
   console.log(secondEntityUserId);
   console.log(entityUserSession);
@@ -95,7 +99,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
         devinuid: {
           [Op.notIn]: devices.rows.map(device => device.devinuid),
         },
-        //...queryUser
+        ...queryUser
       },
       attributes: [
         ...attributes.slice(0, -1), // Use the same attributes except 'check'
