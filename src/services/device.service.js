@@ -88,7 +88,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   combinedDevices = {
     rows: [...devices.rows]
   };
-  /* if (userSelectedId != 'null') {
+  if (userSelectedId != 'null') {
     const devicesAllEntityDistinct = await device.findAndCountAll({
       where: {
         entidevi: entityId,
@@ -109,7 +109,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     combinedDevices = {
       rows: [...devices.rows, ...devicesAllEntityDistinct.rows]
     };
-  } */
+  }
   combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
 
   return combinedDevices;
