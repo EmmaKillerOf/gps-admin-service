@@ -4,28 +4,35 @@ const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
-  console.log(entityUserSession);
-  let query = {}
-  if (userSelectedId != 'null' && entityUserSession.enusrole != 'ADMIN') {
-    query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
-  }else if(userSelectedId == 'null' && entityUserSession.enusrole != 'ADMIN'){
+
+  let query = {}, havingCondition = {};
+  if (userSelectedId != 'null' && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN') {
+    query = { [Op.or]: [{ '$entityDevice.userende$': secondEntityUserId.enusnuid }, { '$entityDevice.userende$': entityUserSession.enusnuid }] };
+    havingCondition = Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('deviende')), {
+      [Op.gt]: 1
+    });
+  } else if (userSelectedId == 'null' && entityUserSession.enusrole != 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  }else if(userSelectedId != 'null' && entityUserSession.enusrole == 'ADMIN'){
+  } else if (userSelectedId != 'null' && entityUserSession.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
+  } else if (userSelectedId != 'null' && secondEntityUserId.enusrole == 'ADMIN') {
+    query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
-  console.log(query);
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
-  const queryUser = userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN' ? {
-    [Op.or]: [
-      //{ '$entityDevice.userende$': entityUserSession.enusnuid },
-      { '$entityDevice.userende$': secondEntityUserId.enusnuid },
-    ],
-  } : {};
+  let queryUser = {};
+  if (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') {
+    queryUser = {
+      [Op.or]: [
+        //{ '$entityDevice.userende$': entityUserSession.enusnuid },
+        { '$entityDevice.userende$': entityUserSession.enusnuid },
+      ]
+    }
+  };
   const includes = secondEntityUserId ? [
     {
       model: entityDevice,
       as: 'entityDevice',
-      attributes: [],
+      attributes: []
     }
   ] : []
   const attributes = [
@@ -88,6 +95,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     attributes,
     order,
     include: commonInclude,
+    group: ['entityDevice.deviende'],
+    having: userSelectedId != 'null' && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? havingCondition : undefined,
     raw: false,
     nest: true
   });

@@ -4,7 +4,7 @@ const userService = require('../services/user.service');
 const entityService = require('../services/entity.service');
 const entityDeviceService = require('../services/entityDevice.service');
 const privilegesService = require('../services/privileges.service');
-
+const deviceService = require('../services/device.service')
 
 const getUser = async (req, res) => {
     try {
@@ -121,10 +121,20 @@ const updateUser = async (req, res) => {
         if (!user) throw 'Usuario que intenta actualizar no existe';
         const entityUser = await entityService.getEntityUser({ userenus: user.usernuid, entienus: entityId });
         if (!entityUser) throw 'Este usuario no esta vinculado a esta entidad';
+        const entityUserSession = await entityService.getEntityUser({ userenus: req.uid, entienus: entityId });
 
         if (name) user = await userService.updateUser(userId, { fullname: name })
 
-        await entityDeviceService.deleteEntityDevice({userende: entityUser.enusnuid});
+        if(entityUserSession.enusrole != 'ADMIN'){
+            const devices = await deviceService.getDevices(entityId, null, entityUser.enusnuid, userId, entityUser, entityUserSession);
+            const trues = devices.rows.filter(e => e.dataValues.check).map(e => e.dataValues.devinuid);
+            const toDelete = trues.filter(e => !deviceSelected.includes(e));
+            if(toDelete.length>0){
+                await entityDeviceService.deleteEntityDevice({userende: entityUser.enusnuid, deviende: toDelete});
+            }
+        }else{
+            await entityDeviceService.deleteEntityDevice({userende: entityUser.enusnuid});
+        }
 
         if (deviceSelected.length > 0) {
             let entityDevicePayload = deviceSelected.map(item => ({
