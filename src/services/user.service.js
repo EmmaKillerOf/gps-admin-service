@@ -7,7 +7,7 @@ const getUserPrivilegies = async (userId, entityId) => {
   const entity = await entityUserService.getByEntityUser(userId, entityId)
   const permissions = await privilegesService.getByEntity(entity.enusnuid)
   return permissions.map(p => {
-    return {key: p.privdesc, value: p.privobse}
+    return  p.privdesc
   });
 }
 
