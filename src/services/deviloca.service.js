@@ -172,6 +172,11 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
     }
   } else {
     await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23, payload);
+    if(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti'){
+      events.push(auxNewPayloadAlarm);
+    }else{
+      events = [];
+    }
   }
 };
 
