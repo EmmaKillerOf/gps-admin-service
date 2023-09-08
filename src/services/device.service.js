@@ -4,18 +4,17 @@ const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
-
   let query = {}, havingCondition = {};
-  if (userSelectedId != 'null' && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN') {
+  if (userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN') {
     query = { [Op.or]: [{ '$entityDevice.userende$': secondEntityUserId.enusnuid }, { '$entityDevice.userende$': entityUserSession.enusnuid }] };
     havingCondition = Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('deviende')), {
       [Op.gt]: 1
     });
-  } else if (userSelectedId == 'null' && entityUserSession.enusrole != 'ADMIN') {
+  } else if (userSelectedId == 'null' && entityUserSession && entityUserSession.enusrole != 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  } else if (userSelectedId != 'null' && entityUserSession.enusrole == 'ADMIN') {
+  } else if (userSelectedId != 'null' && entityUserSession && entityUserSession.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
-  } else if (userSelectedId != 'null' && secondEntityUserId.enusrole == 'ADMIN') {
+  } else if (userSelectedId != 'null' && secondEntityUserId && secondEntityUserId.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
   const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
@@ -95,8 +94,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     attributes,
     order,
     include: commonInclude,
-    group: ['entityDevice.deviende'],
-    having: userSelectedId != 'null' && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? havingCondition : undefined,
+    group: userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? ['entityDevice.deviende'] : undefined,
+    having: userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? havingCondition : undefined,
     raw: false,
     nest: true
   });

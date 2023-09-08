@@ -173,16 +173,22 @@ const workCalculateAllDevices = async (req, res) => {
   const entities = await entityService.getEntities();
   for (let i = 0; i < entities.rows.length; i++) {
     const element = entities.rows[i];
-    const devices = await deviceService.getDevices(element.entinuid);
-    const datosDevice = devices.rows.map(objeto => objeto.dataValues);
-    for (let j = 0; j < datosDevice.length; j++) {
-      const e = datosDevice[j];
-      getTravel({
-        params: {
-          deviceId: e.devinuid, dateSelected: fechaFormateada
-        }
-      });
+    try {
+      const devices = await deviceService.getDevices(element.entinuid);
+      const datosDevice = devices.rows.map(objeto => objeto.dataValues);
+      for (let j = 0; j < datosDevice.length; j++) {
+        const e = datosDevice[j];
+        getTravel({
+          params: {
+            deviceId: e.devinuid, dateSelected: fechaFormateada
+          }
+        });
+      }
+    } catch (error) {
+      console.log(error);
     }
+
+
   }
 }
 
