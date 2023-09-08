@@ -3,6 +3,7 @@ const devialarmService = require('./devialar.service');
 const { Op } = require('sequelize');
 const axios = require('axios');
 let positions = [];
+let events = [];
 const createLocation = async (payload) => {
   let { devidelo, delotime, delolati, delolong, deloacc, delospee, delotinude, delotinu, delodoor, delosigc, delosign } = payload;
   /* delospee = 0;
@@ -161,7 +162,13 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
     if (deloacc == '1' && validateDevice && validateDevice.deviestacomma == 1 && (!validateEvent || validateEvent.keywords.keywcodi == 'end_ralenti')) {
       await createAlarmIfValid(true, 22, payload);
     } else if (deloacc == '0' && validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
-      await createAlarmIfValid(true, 23, payload);
+      if(!events.some(x => x.keywdeal == 23)){
+        const auxNewPayloadAlarm  = await createPayloadAlarm(payload, 23, false);
+        events.push(auxNewPayloadAlarm);
+        await createAlarmIfValid(true, 23, payload);
+      }else{
+        events = [];
+      }
     }
   } else {
     await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23, payload);
@@ -172,7 +179,13 @@ const processParkingCondition = async (deloacc, lastRecordPark, validateEventPar
   if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
     await createAlarmIfValid(true, 20, payload, true, lastRecordPark);
   } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
-    await createAlarmIfValid(true, 21, payload, true, lastRecordPark);
+    if(!events.some(x => x.keywdeal == 21)){
+      const auxNewPayloadAlarm = await createPayloadAlarm(payload, 21, false);
+      events.push(auxNewPayloadAlarm);
+      await createAlarmIfValid(true, 21, payload, true, lastRecordPark);
+    }else{
+      events = [];
+    }
   }
 };
 
