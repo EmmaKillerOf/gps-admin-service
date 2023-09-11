@@ -46,6 +46,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     'deviestacomma'
   ];
   let combinedDevices = { rows: [] };
+  
   if(userSelectedId == 'null' && !available){
     attributes.push([Sequelize.literal('false'), 'check'])
   }else{
@@ -63,14 +64,14 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
         as: 'carrier',
       }
     },
-    {
+   /*  {
       model: clasdevi,
       as: 'clasdevi',
       include: {
         model: classvalue,
         as: 'classvalue'
       }
-    },
+    }, */
     {
       model: kmdevi,
       as: 'kmdevi',
