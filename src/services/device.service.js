@@ -35,6 +35,16 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
       attributes: []
     }
   ] : []
+  const includesClassifiers = userSelectedId == 'null' ? [
+    {
+      model: clasdevi,
+      as: 'clasdevi',
+      include: {
+        model: classvalue,
+        as: 'classvalue'
+      }
+    }
+  ] : []
   const attributes = [
     'devinuid',
     'entidevi',
@@ -64,14 +74,6 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
         as: 'carrier',
       }
     },
-   /*  {
-      model: clasdevi,
-      as: 'clasdevi',
-      include: {
-        model: classvalue,
-        as: 'classvalue'
-      }
-    }, */
     {
       model: kmdevi,
       as: 'kmdevi',
@@ -89,6 +91,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
       limit: 1
     },
     ...includes,
+    ...includesClassifiers
   ];
   const devices = await device.findAndCountAll({
     where: {
