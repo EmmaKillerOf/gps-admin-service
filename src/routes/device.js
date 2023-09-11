@@ -10,7 +10,7 @@ const { sendCommand, sendCommandMultiple, getCommandsAvailable } = require('../c
 //DEVICE
 // ===============================
 
-app.get('/entity/:entityId/:userSelectedId', verificaToken, getDevices);
+app.get('/entity/:entityId/:userSelectedId/:carrId', verificaToken, getDevices);
 
 app.post('/entity/:entityId', verificaToken, createDevice);
 

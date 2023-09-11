@@ -64,7 +64,7 @@ const getPrivilegies = async (req, res) => {
             userPriv.some((otroObjeto) => otroObjeto.key === objeto.key)
             );
         }
-        console.log(privileges);
+
         const response = privileges
 
         res.status(200).json({

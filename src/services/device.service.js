@@ -3,8 +3,9 @@ const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca,
 const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
-const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null) => {
+const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null, carrId) => {
   let query = {}, havingCondition = {};
+  
   if (userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN') {
     query = { [Op.or]: [{ '$entityDevice.userende$': secondEntityUserId.enusnuid }, { '$entityDevice.userende$': entityUserSession.enusnuid }] };
     havingCondition = Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('deviende')), {
@@ -16,8 +17,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
   } else if (userSelectedId != 'null' && secondEntityUserId && secondEntityUserId.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  }
-  const availableQuery = available ? { '$carrdevi.devicade$': { [Op.eq]: null } } : {}
+  } 
+  const availableQuery = available ? { '$carrdevi.carrcade$': { [Op.eq]: carrId } } : {}
   let queryUser = {};
   if (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') {
     queryUser = {
@@ -45,7 +46,11 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     'deviestacomma'
   ];
   let combinedDevices = { rows: [] };
-  if (userSelectedId == 'null' ? attributes.push([Sequelize.literal('false'), 'check']) : attributes.push([Sequelize.literal('true'), 'check']));
+  if(userSelectedId == 'null' && !available){
+    attributes.push([Sequelize.literal('false'), 'check'])
+  }else{
+    attributes.push([Sequelize.literal('true'), 'check'])
+  }
   const order = [['devinuid', 'DESC']];
 
   let commonInclude = [
@@ -102,14 +107,14 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   combinedDevices = {
     rows: [...devices.rows]
   };
-  if (userSelectedId != 'null') {
+  if (userSelectedId != 'null' || available) {
     const devicesAllEntityDistinct = await device.findAndCountAll({
       where: {
         entidevi: entityId,
         devinuid: {
           [Op.notIn]: devices.rows.map(device => device.devinuid),
         },
-        ...queryUser
+        ...queryUser,
       },
       attributes: [
         ...attributes.slice(0, -1), // Use the same attributes except 'check'
