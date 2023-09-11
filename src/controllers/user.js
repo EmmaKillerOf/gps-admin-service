@@ -26,15 +26,15 @@ const getUser = async (req, res) => {
             usersFiltrered = usersFiltrered.map(convertCheckValue);
             function convertCheckValue(obj) {
                 if (obj.entityUser.enusstat === 1) {
-                  obj.entityUser.enusstat = true;
+                  obj.enusstat = true;
                 } else if (obj.entityUser.enusstat === 0) {
-                  obj.entityUser.enusstat = false;
+                  obj.enusstat = false;
                 }
+                delete obj.entityUser;
                 return obj;
               }
         }
             
-
         const response = usersFiltrered || privileges
 
         res.status(200).json({
