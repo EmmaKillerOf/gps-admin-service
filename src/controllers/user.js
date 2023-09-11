@@ -21,20 +21,20 @@ const getUser = async (req, res) => {
             users = await userService.getUsersEntity(entityId);
         }
 
-        if (users){
+        if (users) {
             usersFiltrered = users.filter(user => user.usernuid != userId)
             usersFiltrered = usersFiltrered.map(convertCheckValue);
             function convertCheckValue(obj) {
                 if (obj.entityUser.enusstat === 1) {
-                  obj.enusstat = true;
+                    obj.enusstat = true;
                 } else if (obj.entityUser.enusstat === 0) {
-                  obj.enusstat = false;
+                    obj.enusstat = false;
                 }
                 delete obj.entityUser;
                 return obj;
-              }
+            }
         }
-            
+
         const response = usersFiltrered || privileges
 
         res.status(200).json({
@@ -58,9 +58,13 @@ const getPrivilegies = async (req, res) => {
 
         // Get privilegies
         if (entityId != undefined && privilegies != undefined) {
-            privileges = await userService.getUserPrivilegiesCustom(userId, entityId);
+            const auxPriv = await userService.getUserPrivilegiesCustom(req.uid, entityId);
+            const userPriv = await userService.getUserPrivilegiesCustom(userId, entityId);
+            privileges = auxPriv.filter((objeto) =>
+            userPriv.some((otroObjeto) => otroObjeto.key === objeto.key)
+            );
         }
-
+        console.log(privileges);
         const response = privileges
 
         res.status(200).json({
@@ -151,15 +155,15 @@ const updateUser = async (req, res) => {
 
         if (name) user = await userService.updateUser(userId, { fullname: name })
 
-        if(entityUserSession.enusrole != 'ADMIN'){
+        if (entityUserSession.enusrole != 'ADMIN') {
             const devices = await deviceService.getDevices(entityId, null, entityUser.enusnuid, userId, entityUser, entityUserSession);
             const trues = devices.rows.filter(e => e.dataValues.check).map(e => e.dataValues.devinuid);
             const toDelete = trues.filter(e => !deviceSelected.includes(e));
-            if(toDelete.length>0){
-                await entityDeviceService.deleteEntityDevice({userende: entityUser.enusnuid, deviende: toDelete});
+            if (toDelete.length > 0) {
+                await entityDeviceService.deleteEntityDevice({ userende: entityUser.enusnuid, deviende: toDelete });
             }
-        }else{
-            await entityDeviceService.deleteEntityDevice({userende: entityUser.enusnuid});
+        } else {
+            await entityDeviceService.deleteEntityDevice({ userende: entityUser.enusnuid });
         }
 
         if (deviceSelected.length > 0) {
