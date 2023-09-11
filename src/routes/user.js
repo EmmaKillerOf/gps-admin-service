@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const { verificaToken, validateSchema } = require('../middlewares/autenticacion');
 const _ = require('underscore');
 const app = express();
-const { getUser, createUser, updateUser, deleteUser } = require('../controllers/user')
+const { getUser, createUser, updateUser, deleteUser, getPrivilegies } = require('../controllers/user')
 const {CreateUserSchema, UpdateUserSchema} = require('../schemas/user.schema')
 
 
@@ -11,6 +11,8 @@ const {CreateUserSchema, UpdateUserSchema} = require('../schemas/user.schema')
 //ENTITY
 // ===============================
 app.get('/', verificaToken, getUser);
+
+app.get('/privilegies/', verificaToken, getPrivilegies);
 
 app.post('/entity/:entityId', verificaToken, createUser);
 

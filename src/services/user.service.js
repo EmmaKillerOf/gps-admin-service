@@ -3,11 +3,20 @@ const entityUserService = require('./entityUser.service')
 const privilegesService = require('./privileges.service')
 
 const getUserPrivilegies = async (userId, entityId) => {
-  console.log({userId, entityId})
+  console.log({ userId, entityId })
   const entity = await entityUserService.getByEntityUser(userId, entityId)
   const permissions = await privilegesService.getByEntity(entity.enusnuid)
   return permissions.map(p => {
-    return  p.privdesc
+    return p.privdesc
+  });
+}
+
+const getUserPrivilegiesCustom = async (userId, entityId) => {
+  console.log({ userId, entityId })
+  const entity = await entityUserService.getByEntityUser(userId, entityId)
+  const permissions = await privilegesService.getByEntity(entity.enusnuid)
+  return permissions.map(p => {
+    return { key: p.privdesc, value: p.privobse }
   });
 }
 
@@ -45,24 +54,24 @@ const getUser = async (query) => {
 }
 
 const createUser = async (payload) => {
-  return await User.create({...payload})
+  return await User.create({ ...payload })
 }
 
 const updateUser = async (userId, payload) => {
-  await User.update({...payload},
-    { 
+  await User.update({ ...payload },
+    {
       where: {
         usernuid: userId
       }
-  })
-  return await User.findOne({ attributes:{ exclude:['userpass'] }, where:{usernuid: userId}, raw : false,})
+    })
+  return await User.findOne({ attributes: { exclude: ['userpass'] }, where: { usernuid: userId }, raw: false, })
 }
 
 const deleteUser = async (userId) => {
-  return await User.destroy({ 
-      where: {
-        usernuid: userId
-      }
+  return await User.destroy({
+    where: {
+      usernuid: userId
+    }
   })
 }
 
@@ -72,5 +81,6 @@ module.exports = {
   getUser,
   createUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  getUserPrivilegiesCustom
 }

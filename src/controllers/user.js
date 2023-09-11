@@ -50,6 +50,32 @@ const getUser = async (req, res) => {
     }
 }
 
+const getPrivilegies = async (req, res) => {
+    try {
+        const { entityId, privilegies } = req.query
+        const userId = req.query.userId || req.uid
+        let privileges
+
+        // Get privilegies
+        if (entityId != undefined && privilegies != undefined) {
+            privileges = await userService.getUserPrivilegiesCustom(userId, entityId);
+        }
+
+        const response = privileges
+
+        res.status(200).json({
+            ok: true,
+            response
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({
+            message: error
+        })
+    }
+}
+
 const createUser = async (req, res) => {
     try {
         const { entityId } = req.params;
@@ -192,5 +218,6 @@ module.exports = {
     getUser,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    getPrivilegies
 }
