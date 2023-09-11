@@ -20,7 +20,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   } 
   const availableQuery = available ? { '$carrdevi.carrcade$': { [Op.eq]: carrId } } : {}
   let queryUser = {};
-  if (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') {
+  if ( (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || available) {
     queryUser = {
       [Op.or]: [
         //{ '$entityDevice.userende$': entityUserSession.enusnuid },
