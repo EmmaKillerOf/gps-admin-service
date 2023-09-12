@@ -17,7 +17,8 @@ const UpdateUserSchema = Joi.object({
     name: Joi.string().optional(),
     privileges: Joi.array().items(Joi.string()),
     email:Joi.string().email().required(),
-    deviceSelected: Joi.array().required()
+    deviceSelected: Joi.array().required(),
+    status: Joi.boolean().required()
   }),
   params: Joi.object({
     userId:Joi.number().required(),
