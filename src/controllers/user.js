@@ -61,7 +61,7 @@ const getPrivilegies = async (req, res) => {
             const auxPriv = await userService.getUserPrivilegiesCustom(req.uid, entityId);
             const userPriv = await userService.getUserPrivilegiesCustom(userId, entityId);
             privileges = auxPriv.filter((objeto) =>
-            userPriv.some((otroObjeto) => otroObjeto.key === objeto.key)
+                userPriv.some((otroObjeto) => otroObjeto.key === objeto.key)
             );
         }
 
@@ -152,9 +152,8 @@ const updateUser = async (req, res) => {
         const entityUser = await entityService.getEntityUser({ userenus: user.usernuid, entienus: entityId });
         if (!entityUser) throw 'Este usuario no esta vinculado a esta entidad';
         const entityUserSession = await entityService.getEntityUser({ userenus: req.uid, entienus: entityId });
-
         if (name) user = await userService.updateUser(userId, { fullname: name })
-        if (status) await entityService.updateEntityUser(entityId, { enusstat: status }, { enusnuid: entityUser.enusnuid });
+        await entityService.updateEntityUser({ enusstat: status }, entityUser.enusnuid);
 
         if (entityUserSession.enusrole != 'ADMIN') {
             const devices = await deviceService.getDevices(entityId, null, entityUser.enusnuid, userId, entityUser, entityUserSession);
@@ -185,7 +184,7 @@ const updateUser = async (req, res) => {
             })
             await Promise.all(permissionPromises)
         }
-
+        console.log(user);
         res.status(200).json({
             ok: true,
             response: user

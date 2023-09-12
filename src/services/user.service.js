@@ -3,7 +3,6 @@ const entityUserService = require('./entityUser.service')
 const privilegesService = require('./privileges.service')
 
 const getUserPrivilegies = async (userId, entityId) => {
-  console.log({ userId, entityId })
   const entity = await entityUserService.getByEntityUser(userId, entityId)
   const permissions = await privilegesService.getByEntity(entity.enusnuid)
   return permissions.map(p => {
@@ -12,7 +11,6 @@ const getUserPrivilegies = async (userId, entityId) => {
 }
 
 const getUserPrivilegiesCustom = async (userId, entityId) => {
-  console.log({ userId, entityId })
   const entity = await entityUserService.getByEntityUser(userId, entityId)
   const permissions = await privilegesService.getByEntity(entity.enusnuid)
   return permissions.map(p => {
@@ -38,8 +36,6 @@ const getUsersEntity = async (entityId, pagination = {}) => {
   });
 
   // Ahora puedes acceder a las propiedades de entityUser directamente en cada fila
-  console.log(users);
-
   return users;
 };
 
