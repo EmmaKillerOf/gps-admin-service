@@ -145,7 +145,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     try {
         const { entityId, userId } = req.params;
-        const { name, privileges, deviceSelected } = req.body;
+        const { name, privileges, deviceSelected, status } = req.body;
         let user
         user = await userService.getUser({ usernuid: userId });
         if (!user) throw 'Usuario que intenta actualizar no existe';
@@ -154,6 +154,7 @@ const updateUser = async (req, res) => {
         const entityUserSession = await entityService.getEntityUser({ userenus: req.uid, entienus: entityId });
 
         if (name) user = await userService.updateUser(userId, { fullname: name })
+        if (status) await entityService.updateEntityUser(entityId, { enusstat: status }, { enusnuid: entityUser.enusnuid });
 
         if (entityUserSession.enusrole != 'ADMIN') {
             const devices = await deviceService.getDevices(entityId, null, entityUser.enusnuid, userId, entityUser, entityUserSession);

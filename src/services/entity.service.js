@@ -65,6 +65,15 @@ const updateEntity = async (entityId, payload) => {
   return entity.findOne({ where:{ entinuid: entityId }, raw : false,})
 }
 
+const updateEntityUser = async (entityId, payload, wheres) => {
+  const entityResult = await entityUser.update({...payload}, {
+    where: {
+      ...wheres
+    }
+  })
+  return entity.findOne({ where:{ entinuid: entityId }, raw : false,})
+}
+
 const createEntityUser = async (payload) => {
   const entityResult = await entityUser.create({...payload})
   return entityResult
@@ -88,5 +97,6 @@ module.exports = {
   createEntity,
   createEntityUser,
   deleteEntityUser,
-  updateEntity
+  updateEntity,
+  updateEntityUser
 }
