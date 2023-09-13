@@ -20,7 +20,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
   } else if(userSelectedId == 'null' && available){
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
-  console.log(query);
+  
   const availableQuery = available ? { '$carrdevi.carrcade$': { [Op.eq]: carrId } } : {}
   let queryUser = {};
   if ( (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || available) {
@@ -94,7 +94,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
       limit: 1
     },
     ...includes,
-    ...includesClassifiers
+    ...includesClassifiers,
+    
   ];
   const devices = await device.findAndCountAll({
     where: {
@@ -109,7 +110,8 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     group: userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? ['entityDevice.deviende'] : undefined,
     having: userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? havingCondition : undefined,
     raw: false,
-    nest: true
+    nest: true,
+    //logging:true
   });
   combinedDevices = {
     rows: [...devices.rows]
@@ -544,7 +546,6 @@ const deleteCarrierDevice = async (deviceId) => {
 }
 
 const createClasdevi = async (payload) => {
-  console.log({ payload })
   const deviceResult = await clasdevi.bulkCreate(payload)
   return deviceResult
 }

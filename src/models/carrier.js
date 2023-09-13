@@ -10,28 +10,41 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(model) {
-      this.hasOne(model.carrdevi, {as: 'carrdevi', foreignKey: 'carrcade'});
+      this.hasOne(model.carrdevi, { as: 'carrdevi', foreignKey: 'carrcade' });
+      this.belongsTo(model.carrcombu, { as: 'carrcombu', foreignKey: 'combucarr' });
     }
   }
   carrier.init({
-    carrnuid:{ 
+    carrnuid: {
       allowNull: false,
       autoIncrement: true,
       primaryKey: true,
-      type:DataTypes.INTEGER
-     },
-    enticarr:{ 
+      type: DataTypes.INTEGER
+    },
+    enticarr: {
       allowNull: false,
-      type:DataTypes.INTEGER
-     },
-    carrlice:{ 
+      type: DataTypes.INTEGER
+    },
+    carrlice: {
       allowNull: false,
-      type:DataTypes.STRING
-     },
-    carrtype:{ 
+      type: DataTypes.STRING
+    },
+    carrtype: {
       allowNull: false,
-      type:DataTypes.STRING
-     },
+      type: DataTypes.STRING
+    },
+    combucarr: {
+      allowNull: false,
+      type: DataTypes.INTEGER
+    },
+    carrcapa: {
+      allowNull: false,
+      type: DataTypes.INTEGER
+    },
+    carrrendi: {
+      allowNull: false,
+      type: DataTypes.INTEGER
+    },
   }, {
     sequelize,
     timestamps: false,

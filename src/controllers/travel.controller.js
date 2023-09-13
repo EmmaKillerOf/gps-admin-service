@@ -7,7 +7,7 @@ const entityService = require('../services/entity.service');
 
 const getTravel = async (req, res) => {
   try {
-    const { deviceId, dateSelected } = req.params;
+    const { deviceId, dateSelected, device } = req.params;
     const travelsCalculatesOld = await travelService.getKmsCalculates(deviceId, dateSelected);
     const travels = await travelService.getTravel(deviceId, dateSelected);
 
@@ -28,7 +28,7 @@ const getTravel = async (req, res) => {
       const { delonuid } = travels[0];
       const { delonuid: lastDelonuid } = travels[travels.length - 1];
 
-      const payload = kmMapping([deviceId, delonuid, lastDelonuid, dateSelected, DistanceTotal]);
+      const payload = kmMapping([deviceId, delonuid, lastDelonuid, dateSelected, DistanceTotal, calculateConsum(DistanceTotal, device.carrdevi.carrier.carrrendi)]);
       const kmHistoId = await travelService.createKm(payload);
 
       if (kmHistoId) {
@@ -56,6 +56,10 @@ const getTravel = async (req, res) => {
       error
     });
   }
+}
+
+function calculateConsum(distance, rend, captanque) {
+  return (distance / rend) * captanque;
 }
 
 const getTravelMonthly = async (req, res) => {
@@ -139,6 +143,7 @@ const kmMapping = (data) => {
     kmdelofin: data[2],
     kmdiacapt: `${data[3]}`,
     kmcapt: data[4],
+    kmconsu: data[5]
   }
   return payload
 }
@@ -180,7 +185,7 @@ const workCalculateAllDevices = async (req, res) => {
         const e = datosDevice[j];
         getTravel({
           params: {
-            deviceId: e.devinuid, dateSelected: fechaFormateada
+            deviceId: e.devinuid, dateSelected: fechaFormateada, device: e
           }
         });
       }
