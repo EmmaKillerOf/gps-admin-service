@@ -5,7 +5,7 @@ const { forEach } = require("underscore");
 
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null, carrId) => {
   let query = {}, havingCondition = {};
-  
+
   if (userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN') {
     query = { [Op.or]: [{ '$entityDevice.userende$': secondEntityUserId.enusnuid }, { '$entityDevice.userende$': entityUserSession.enusnuid }] };
     havingCondition = Sequelize.where(Sequelize.fn('COUNT', Sequelize.col('deviende')), {
@@ -17,13 +17,13 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
   } else if (userSelectedId != 'null' && secondEntityUserId && secondEntityUserId.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  } else if(userSelectedId == 'null' && available){
+  } else if (userSelectedId == 'null' && available) {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
-  
+
   const availableQuery = available ? { '$carrdevi.carrcade$': { [Op.eq]: carrId } } : {}
   let queryUser = {};
-  if ( (userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || available) {
+  if ((userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || available) {
     queryUser = {
       [Op.or]: [
         //{ '$entityDevice.userende$': entityUserSession.enusnuid },
@@ -59,10 +59,10 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     'deviestacomma'
   ];
   let combinedDevices = { rows: [] };
-  
-  if(userSelectedId == 'null' && !available){
+
+  if (userSelectedId == 'null' && !available) {
     attributes.push([Sequelize.literal('false'), 'check'])
-  }else{
+  } else {
     attributes.push([Sequelize.literal('true'), 'check'])
   }
   const order = [['devinuid', 'DESC']];
@@ -95,7 +95,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     },
     ...includes,
     ...includesClassifiers,
-    
+
   ];
   const devices = await device.findAndCountAll({
     where: {
@@ -307,34 +307,38 @@ function processAndTransform(deviceResult) {
     if (device.deviloca) {
       const devilocaEntries = device.deviloca.map(entry => ({
         ...entry.dataValues,
-        keywords: { keywfunc: 'Posición', keytypenomb: POSITION_KEYWORD },
+        keywords: {
+          keywfunc: entry.dataValues.delospee != "0" ? 'En movimiento' : 'Sin movimiento',
+          keytypenomb: POSITION_KEYWORD
+        },
         source: 'deviloca'
       }));
+
       allEntries.push(...devilocaEntries);
+}
+if (device.devialar) {
+  const devialarEntries = device.devialar.map(entry => {
+    const transformedEntry = {
+      ...entry.dataValues,
+      source: 'devialar'
+    };
+    if (entry.dataValues.keywords.dataValues && entry.dataValues.keywords.dataValues.keytype && entry.dataValues.keywords.dataValues.keyalarm) {
+      transformedEntry.keywords.dataValues.keytypenomb = 'alarm';
+    } else {
+      transformedEntry.keywords.dataValues.keytypenomb = 'event';
     }
-    if (device.devialar) {
-      const devialarEntries = device.devialar.map(entry => {
-        const transformedEntry = {
-          ...entry.dataValues,
-          source: 'devialar'
-        };
-        if (entry.dataValues.keywords.dataValues && entry.dataValues.keywords.dataValues.keytype && entry.dataValues.keywords.dataValues.keyalarm) {
-          transformedEntry.keywords.dataValues.keytypenomb = 'alarm';
-        } else {
-          transformedEntry.keywords.dataValues.keytypenomb = 'event';
-        }
-        return transformedEntry;
-      });
-      allEntries.push(...devialarEntries);
-    }
+    return transformedEntry;
   });
-  let transformedEntries = allEntries
-    .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
-    .map(transformEntry);
-  infoDevices.forEach(e => {
-    e.locations = transformedEntries.filter(x => x.devidelo == e.devinuid);
+  allEntries.push(...devialarEntries);
+}
   });
-  return infoDevices;
+let transformedEntries = allEntries
+  .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
+  .map(transformEntry);
+infoDevices.forEach(e => {
+  e.locations = transformedEntries.filter(x => x.devidelo == e.devinuid);
+});
+return infoDevices;
 }
 
 function transformEntry(entry) {

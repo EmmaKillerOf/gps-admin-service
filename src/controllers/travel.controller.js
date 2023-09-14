@@ -59,7 +59,7 @@ const getTravel = async (req, res) => {
 }
 
 function calculateConsum(distance, rend, captanque) {
-  return (distance / rend) * captanque;
+  return (distance / rend);
 }
 
 const getTravelMonthly = async (req, res) => {
