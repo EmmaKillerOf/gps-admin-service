@@ -18,7 +18,7 @@ app.get('/command/available', verificaToken, getCommandsAvailable);
 
 app.post('/send/command/multiple', verificaToken, sendCommandMultiple);
 
-/* app.post('/command', verificaToken, sendCommand); */
+app.post('/command', verificaToken, sendCommand);
 
 app.patch('/:deviceId', verificaToken, updateDevice);
 
