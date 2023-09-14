@@ -134,6 +134,19 @@ const findLastEvent = async (devideal, keywordsConditions) => {
   });
 };
 
+const findLastEventTow = async (devideal, keywordsConditions) => {
+  return await devialar.findOne({
+    where: {
+      devideal: devideal,
+      [Op.or]: keywordsConditions
+    },
+    order: [['dealtime', 'DESC']],
+    include: [{ model: keywords, as: 'keywords' }],
+    raw: true,
+    nest: true,
+  });
+};
+
 const findDevice = async (devidelo) => {
   return await device.findOne({
     where: {

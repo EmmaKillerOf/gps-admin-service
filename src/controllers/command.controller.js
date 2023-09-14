@@ -14,23 +14,22 @@ const getCommandsAvailable = async (req, res) => {
     }
 }
 
-const sendCommand = async (body, req) => {
+const sendCommand = async (req, res) => {
     try {
-        const aux = body ? body : req.body;
-        console.log(aux);
+        const aux = req.body;
         const validate = await commandService.getExistCommand(aux);
         if (validate) return false
-        const info = await commandService.getInfoCommand(body);
-        const arrCommandsSQL = setParams(info[0], [], body, 'SQL', req);
-        const arrCommandsRedis = setParams(info[0], info[1], body, 'REDIS', req);
+        const info = await commandService.getInfoCommand(aux);
+        const arrCommandsSQL = setParams(info[0], [], aux, 'SQL', (req.uid ? req : body ));
+        const arrCommandsRedis = setParams(info[0], info[1], aux, 'REDIS', req);
         await commandService.sendCommand(arrCommandsSQL);
         sendCommandRedis(arrCommandsRedis);
-        return true
+        if(req.uid){
+            return true;
+        }
+        return res.status(200).json({response: true});
     } catch (error) {
         console.log(error)
-        res.status(400).json({
-            error
-        })
     }
 }
 
