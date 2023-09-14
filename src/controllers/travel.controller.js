@@ -60,7 +60,7 @@ function calculateConsum(distance, rend, captanque) {
   if (rend <= 0) {
     return 0; // Prevent division by zero
   }
-  
+
   const consum = distance / rend;
 
   return consum;
@@ -106,19 +106,28 @@ const getTimes = async (deviceId, dateInit, dateFinal) => {
     const timeOperation = calculateTime(filterOperation, 18, 19);
     const timeRalenti = calculateTime(filterRalenti, 22, 23);
     const timeMovement = timeMovementsByDay(timeOperation, timeRalenti);
-  
     return { timeOperation, timeRalenti, timeMovement };
   } catch (error) {
-    console.log(error); 
+    console.log(error);
   }
+}
+
+function reorganizeDates(obj) {
+  const reorganizedObj = {};
+  for (const date in obj) {
+    if (obj.hasOwnProperty(date)) {
+      const dateObj = obj[date];
+      dateObj.date = date;
+      reorganizedObj[date] = dateObj;
+    }
+  }
+  return Object.values(reorganizedObj);
 }
 
 function calculateTime(times, codeIni, codeFin) {
   const durationPerDay = {};
-
   let startTime = null;
   let currentDate = null;
-
   times.forEach(item => {
     if (item.keywdeal === codeIni) {
       startTime = moment.tz(item.delotinude, 'America/Bogota'); // 'America/Bogota' is the time zone for Colombia
@@ -126,12 +135,10 @@ function calculateTime(times, codeIni, codeFin) {
     } else if (item.keywdeal === codeFin && startTime !== null) {
       const endTime = moment.tz(item.delotinude, 'America/Bogota');
       const timeDifference = endTime - startTime;
-
       if (!durationPerDay[currentDate]) {
         durationPerDay[currentDate] = 0;
       }
       durationPerDay[currentDate] += timeDifference;
-
       startTime = null;
       currentDate = null;
     }
@@ -146,8 +153,7 @@ function calculateTime(times, codeIni, codeFin) {
       results[date] = formattedDuration;
     }
   }
-
-  return results;
+  return reorganizeDates(results);
 }
 
 function convertMilliseconds(milliseconds) {
@@ -164,21 +170,23 @@ function convertMilliseconds(milliseconds) {
   };
 }
 
-
 function timeMovementsByDay(time1, time2) {
   const result = {};
-  
+
   // Obtén todas las fechas disponibles en ambos objetos
-  const dates = [...new Set([...Object.keys(time1), ...Object.keys(time2)])];
+  const dates = [...new Set([...time1.map(item => item.date), ...time2.map(item => item.date)])];
 
   for (const date of dates) {
-    const hours1 = time1[date] ? time1[date].hours : 0;
-    const minutes1 = time1[date] ? time1[date].minutes : 0;
-    const seconds1 = time1[date] ? time1[date].seconds : 0;
+    const time1Obj = time1.find(item => item.date === date) || { hours: 0, minutes: 0, seconds: 0 };
+    const time2Obj = time2.find(item => item.date === date) || { hours: 0, minutes: 0, seconds: 0 };
 
-    const hours2 = time2[date] ? time2[date].hours : 0;
-    const minutes2 = time2[date] ? time2[date].minutes : 0;
-    const seconds2 = time2[date] ? time2[date].seconds : 0;
+    const hours1 = time1Obj.hours;
+    const minutes1 = time1Obj.minutes;
+    const seconds1 = time1Obj.seconds;
+
+    const hours2 = time2Obj.hours;
+    const minutes2 = time2Obj.minutes;
+    const seconds2 = time2Obj.seconds;
 
     let totalSecondsDifference = (hours1 * 3600 + minutes1 * 60 + seconds1) - (hours2 * 3600 + minutes2 * 60 + seconds2);
 
@@ -191,13 +199,14 @@ function timeMovementsByDay(time1, time2) {
     const seconds = totalSecondsDifference % 60;
 
     result[date] = {
+      date,
       hours,
       minutes,
       seconds,
     };
   }
 
-  return result;
+  return Object.values(result);
 }
 
 const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
