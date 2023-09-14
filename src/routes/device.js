@@ -16,9 +16,9 @@ app.post('/entity/:entityId', verificaToken, createDevice);
 
 app.get('/command/available', verificaToken, getCommandsAvailable);
 
-app.post('/send/command/multiple', verificaToken, sendCommandMultiple);
+/* app.post('/send/command/multiple', verificaToken, sendCommandMultiple); */
 
-app.post('/command', verificaToken, sendCommand);
+app.post('/command', verificaToken, sendCommandMultiple);
 
 app.patch('/:deviceId', verificaToken, updateDevice);
 
