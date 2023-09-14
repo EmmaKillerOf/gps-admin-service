@@ -16,7 +16,9 @@ const getCommandsAvailable = async (req, res) => {
 
 const sendCommand = async (body, req) => {
     try {
-        const validate = await commandService.getExistCommand(body);
+        const aux = body ? body : req.body;
+        console.log(aux);
+        const validate = await commandService.getExistCommand(aux);
         if (validate) return false
         const info = await commandService.getInfoCommand(body);
         const arrCommandsSQL = setParams(info[0], [], body, 'SQL', req);
