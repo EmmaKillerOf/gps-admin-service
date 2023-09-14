@@ -4,6 +4,7 @@ const devilocaService = require('../services/deviloca.service');
 const deviceService = require('../services/device.service');
 const dehiskmService = require('../services/dehiskm.service');
 const entityService = require('../services/entity.service');
+const moment = require('moment-timezone');
 
 const getTravel = async (req, res) => {
   try {
@@ -52,14 +53,17 @@ const getTravel = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(400).json({
-      error
-    });
   }
 }
 
 function calculateConsum(distance, rend, captanque) {
-  return (distance / rend);
+  if (rend <= 0) {
+    return 0; // Prevent division by zero
+  }
+  
+  const consum = distance / rend;
+
+  return consum;
 }
 
 const getTravelMonthly = async (req, res) => {
@@ -75,6 +79,125 @@ const getTravelMonthly = async (req, res) => {
       error
     });
   }
+}
+
+const getKmTravelTempRoute = async (req, res) => {
+  try {
+    const { deviceId, dateInit, dateFinal } = req.params
+    const minutesStart = hasTimeIncluded(dateInit, 'start');
+    const minutesEnd = hasTimeIncluded(dateFinal, 'end');
+    const result = await getTimes(deviceId, dateInit + minutesStart, dateFinal + minutesEnd);
+    res.status(200).json({
+      response: result
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      error
+    });
+  }
+}
+
+const getTimes = async (deviceId, dateInit, dateFinal) => {
+  try {
+    const times = await travelService.getTravelTimes(deviceId, dateInit, dateFinal);
+    const filterOperation = times.filter(item => item.keywdeal === 18 || item.keywdeal === 19);
+    const filterRalenti = times.filter(item => item.keywdeal === 22 || item.keywdeal === 23);
+    const timeOperation = calculateTime(filterOperation, 18, 19);
+    const timeRalenti = calculateTime(filterRalenti, 22, 23);
+    const timeMovement = timeMovementsByDay(timeOperation, timeRalenti);
+  
+    return { timeOperation, timeRalenti, timeMovement };
+  } catch (error) {
+    console.log(error); 
+  }
+}
+
+function calculateTime(times, codeIni, codeFin) {
+  const durationPerDay = {};
+
+  let startTime = null;
+  let currentDate = null;
+
+  times.forEach(item => {
+    if (item.keywdeal === codeIni) {
+      startTime = moment.tz(item.delotinude, 'America/Bogota'); // 'America/Bogota' is the time zone for Colombia
+      currentDate = startTime.format('YYYY-MM-DD'); // Get the date in the desired format
+    } else if (item.keywdeal === codeFin && startTime !== null) {
+      const endTime = moment.tz(item.delotinude, 'America/Bogota');
+      const timeDifference = endTime - startTime;
+
+      if (!durationPerDay[currentDate]) {
+        durationPerDay[currentDate] = 0;
+      }
+      durationPerDay[currentDate] += timeDifference;
+
+      startTime = null;
+      currentDate = null;
+    }
+  });
+
+  // Format the duration per day in the desired format
+  const results = {};
+  for (const date in durationPerDay) {
+    if (durationPerDay.hasOwnProperty(date)) {
+      const totalMilliseconds = durationPerDay[date];
+      const formattedDuration = convertMilliseconds(totalMilliseconds);
+      results[date] = formattedDuration;
+    }
+  }
+
+  return results;
+}
+
+function convertMilliseconds(milliseconds) {
+  const seconds = Math.floor(milliseconds / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
+  return {
+    hours: hours,
+    minutes: remainingMinutes,
+    seconds: remainingSeconds
+  };
+}
+
+
+function timeMovementsByDay(time1, time2) {
+  const result = {};
+  
+  // Obtén todas las fechas disponibles en ambos objetos
+  const dates = [...new Set([...Object.keys(time1), ...Object.keys(time2)])];
+
+  for (const date of dates) {
+    const hours1 = time1[date] ? time1[date].hours : 0;
+    const minutes1 = time1[date] ? time1[date].minutes : 0;
+    const seconds1 = time1[date] ? time1[date].seconds : 0;
+
+    const hours2 = time2[date] ? time2[date].hours : 0;
+    const minutes2 = time2[date] ? time2[date].minutes : 0;
+    const seconds2 = time2[date] ? time2[date].seconds : 0;
+
+    let totalSecondsDifference = (hours1 * 3600 + minutes1 * 60 + seconds1) - (hours2 * 3600 + minutes2 * 60 + seconds2);
+
+    if (totalSecondsDifference < 0) {
+      totalSecondsDifference += 86400; // 86400 segundos en un día (24 horas)
+    }
+
+    const hours = Math.floor(totalSecondsDifference / 3600);
+    const minutes = Math.floor((totalSecondsDifference % 3600) / 60);
+    const seconds = totalSecondsDifference % 60;
+
+    result[date] = {
+      hours,
+      minutes,
+      seconds,
+    };
+  }
+
+  return result;
 }
 
 const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
@@ -97,9 +220,6 @@ const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
     return DistanceTotal;
   } catch (error) {
     console.log(error);
-    res.status(400).json({
-      error
-    });
   }
 }
 
@@ -203,5 +323,7 @@ module.exports = {
   getTravel,
   getKmTravelTemp,
   workCalculateAllDevices,
-  getTravelMonthly
+  getTravelMonthly,
+  getKmTravelTempRoute,
+  getTimes
 }

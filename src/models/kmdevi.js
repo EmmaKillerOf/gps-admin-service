@@ -50,7 +50,7 @@ module.exports = (sequelize, DataTypes) => {
      }, 
      kmconsu:{
       allowNull: false,
-      type:DataTypes.FLOAT             
+      type:DataTypes.STRING             
      }
   }, {
     sequelize,

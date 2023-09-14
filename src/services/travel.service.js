@@ -1,6 +1,6 @@
 const { Op, Sequelize } = require('sequelize');
 const axios = require('axios');
-const { kmdevi, device, carrdevi, carrier } = require('../models');
+const { kmdevi, device, carrdevi, carrier, devialar } = require('../models');
 
 const config = require('../config/environment')
 const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
@@ -17,6 +17,26 @@ const getTravelTemp = async (deviceId, dateInit, dateFinal) => {
   const travels = `call get_positions_vehicle_temp(${deviceId}, '${dateInit}', '${dateFinal}')`
   const result = await raw.query(travels)
   return result
+}
+
+const getTravelTimes = async (deviceId, dateInit, dateFinal) => {
+  const travels = await devialar.findAll({
+    where: {
+      devideal: {
+        [Op.in]: [18,19, 22, 23]
+      },
+      devideal: deviceId,
+      delotinude: {
+        [Op.and]: {
+          [Op.gte]: dateInit,
+          [Op.lte]: dateFinal 
+        }
+      }
+    },
+    raw: true,
+    nest: true
+  });
+  return travels
 }
 
 const getTravelMonthly = async (deviceIds, month, year) => {
@@ -98,5 +118,6 @@ module.exports = {
   getKmsCalculates,
   getTravelTemp,
   createKm,
-  getTravelMonthly
+  getTravelMonthly,
+  getTravelTimes
 }

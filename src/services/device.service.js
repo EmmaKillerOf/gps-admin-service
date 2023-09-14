@@ -241,9 +241,10 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
 };
 
 const calculateKmTemp = async (deviceResult, startDate, endDate) => {
-  const { getKmTravelTemp } = require("../controllers/travel.controller");
+  const { getKmTravelTemp, getTimes } = require("../controllers/travel.controller");
   for (const e of deviceResult) {
     e.kmTotally = await getKmTravelTemp(e.devinuid, startDate, endDate);
+    e.times = await getTimes(e.devinuid, startDate, endDate);
   }
   return deviceResult;
 }
