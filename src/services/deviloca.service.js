@@ -37,6 +37,10 @@ const createLocation = async (payload) => {
     return;
   }
 
+  if (delospee != 0 && deloacc == '0') {
+    await createAlarmIfValid(true, 33, payload, false);
+  }
+
   // Verificar si se cumple la condición para evitar puntos cercanos de parqueo
   const isConditionMet = lastRecordPark.length === 2 && lastRecordPark[0].delospee === '0' && lastRecordPark[1].delospee === '0' && delospee === 0;
 
@@ -134,19 +138,6 @@ const findLastEvent = async (devideal, keywordsConditions) => {
   });
 };
 
-const findLastEventTow = async (devideal, keywordsConditions) => {
-  return await devialar.findOne({
-    where: {
-      devideal: devideal,
-      [Op.or]: keywordsConditions
-    },
-    order: [['dealtime', 'DESC']],
-    include: [{ model: keywords, as: 'keywords' }],
-    raw: true,
-    nest: true,
-  });
-};
-
 const findDevice = async (devidelo) => {
   return await device.findOne({
     where: {
@@ -175,19 +166,19 @@ const processRalentiCondition = async (lastRecordPark, delospee, deloacc, valida
     if (deloacc == '1' && validateDevice && validateDevice.deviestacomma == 1 && (!validateEvent || validateEvent.keywords.keywcodi == 'end_ralenti')) {
       await createAlarmIfValid(true, 22, payload);
     } else if (deloacc == '0' && validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
-      if(!events.some(x => x.keywdeal == 23)){
-        const auxNewPayloadAlarm  = await createPayloadAlarm(payload, 23, false);
+      if (!events.some(x => x.keywdeal == 23)) {
+        const auxNewPayloadAlarm = await createPayloadAlarm(payload, 23, false);
         events.push(auxNewPayloadAlarm);
         await createAlarmIfValid(true, 23, payload);
-      }else{
+      } else {
         events = [];
       }
     }
   } else {
     await createAlarmIfValid(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti', 23, payload);
-    if(validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti'){
+    if (validateEvent && validateEvent.keywords.keywcodi == 'on_ralenti') {
       events.push(auxNewPayloadAlarm);
-    }else{
+    } else {
       events = [];
     }
   }
@@ -197,11 +188,11 @@ const processParkingCondition = async (deloacc, lastRecordPark, validateEventPar
   if (deloacc == '0' && lastRecordPark[0].deloacc == '0' && (!validateEventPark || validateEventPark.keywords.keywcodi == 'end_parking')) {
     await createAlarmIfValid(true, 20, payload, true, lastRecordPark);
   } else if (deloacc == '1' && validateEventPark && validateEventPark.keywords.keywcodi == 'on_parking') {
-    if(!events.some(x => x.keywdeal == 21)){
+    if (!events.some(x => x.keywdeal == 21)) {
       const auxNewPayloadAlarm = await createPayloadAlarm(payload, 21, false);
       events.push(auxNewPayloadAlarm);
       await createAlarmIfValid(true, 21, payload, true, lastRecordPark);
-    }else{
+    } else {
       events = [];
     }
   }
