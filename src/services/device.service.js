@@ -192,12 +192,13 @@ const getDateActually = () => {
   return formattedDate;
 }
 
-const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation = true, isEvent }) => {
+const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation = true, isEvent, typeReport }) => {
   try {
     const includeArray = [];
     const minutesStart = hasTimeIncluded(startDate, 'start');
     const minutesEnd = hasTimeIncluded(endDate, 'end');
     const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
+    const limits = typeReport != 3 ? 1 : null; 
     const dateQuery = {
       delotinude: {
         [Op.and]: {
@@ -207,7 +208,7 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
       }
     }
     if (isLocation) {
-      includeArray.push(getLocationInclude(dateQuery));
+      includeArray.push(getLocationInclude(dateQuery, limits));
     }
     if (isAlarm || isEvent) {
       includeArray.push(getAlarmInclude(dateQuery, isAlarm, isEvent));
@@ -259,7 +260,7 @@ const calculateKmTemp = async (deviceResult, startDate, endDate) => {
 }
 
 
-const getLocationInclude = (dateQuery) => ({
+const getLocationInclude = (dateQuery, limits) => ({
   model: deviloca,
   as: 'deviloca',
   separate: true,
@@ -267,6 +268,7 @@ const getLocationInclude = (dateQuery) => ({
     ...dateQuery,
     delosign: 'F'
   },
+  limit: limits,
   order: [['delotinude', 'DESC']],
 });
 

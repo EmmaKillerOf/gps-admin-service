@@ -12,6 +12,7 @@ const GetLocationsSchema = Joi.object({
       startDate: Joi.string().optional(),
       endDate: Joi.string().optional(),
     }),
+    typeReport: Joi.number().required(),
   }),
   params: Joi.object({
     entityId:Joi.number().required(),

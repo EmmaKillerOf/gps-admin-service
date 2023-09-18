@@ -208,7 +208,7 @@ const getDevicePositions = async (req, res) => {
     const { entityId } = req.params;
     const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId })
     if (!entityUser) throw "Usuario no autorizado en esta entidad";
-    const { classifiers, plate, deviceIds = [], isAlarm, isLocation, isEvent, date } = req.body;
+    const { classifiers, plate, deviceIds = [], isAlarm, isLocation, isEvent, date, typeReport } = req.body;
     const devices = [];
     const hasDate = date ? { startDate, endDate } = date : {};
     const classifiersDevice = (await getDevicesByClassifier(classifiers)).map(device => device.deviclde)
@@ -220,7 +220,8 @@ const getDevicePositions = async (req, res) => {
       plate,
       isAlarm, 
       isLocation, 
-      isEvent
+      isEvent, 
+      typeReport
     }
     let locations;
 
