@@ -14,7 +14,7 @@ app.post('/', verificaToken, createLocation);
 
 app.post('/from-redis/', verificaToken, createLocationsFromRedis);
 
-app.post('/getDevicePositions/entity/:entityId/:typeReport', [verificaToken, validateSchema(GetLocationsSchema)], getDevicePositions);
+app.post('/getDevicePositions/entity/:entityId', [verificaToken, validateSchema(GetLocationsSchema)], getDevicePositions);
 
 
 
