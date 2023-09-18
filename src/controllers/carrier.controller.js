@@ -76,28 +76,27 @@ const getCarriers = async (req, res) => {
 const updateCarrier = async (req, res) => {
     try {
         const carrierId = Number(req.params.carrierId)
-        const { idNumber, type, deviceId } = req.body;
+        const { vehicleId, type, selectedDeviceId, plate } = req.body;
         const carrier = await carrierService.getCarrier({ carrnuid: carrierId });
         if(!carrier) throw 'Vehiculo no existe';
-        if(carrier.carrlice != idNumber){
-            const exists = await carrierService.getCarrier({ enticarr: carrier.enticarr, carrlice: idNumber });
+        if(carrier.carrlice != plate){
+            const exists = await carrierService.getCarrier({ enticarr: carrier.enticarr, carrlice: plate });
             if(exists) throw 'Este vehiculo ya existe en tu entidad';
         }
-        
         const payloadCarrier = {
             carrtype: type || carrier.carrtype,
-            carrlice: idNumber || carrier.carrlice
+            carrlice: plate || carrier.carrlice
         }
         const updatedCarrier = await carrierService.updateCarrier(carrierId, payloadCarrier);
-        if(deviceId) {
-            console.log({deviceId})
-            const device = await deviceService.getDevice({ devinuid: deviceId });
+        if(selectedDeviceId) {
+            
+            const device = await deviceService.getDevice({ devinuid: selectedDeviceId });
             if (!device) throw 'El dispositivo que intenta asociar no existe';
-            const deviceExists = await carrierService.getCarriDevi({devicade: deviceId})   
+            const deviceExists = await carrierService.getCarriDevi({devicade: selectedDeviceId})   
             const carrierExists = await carrierService.getCarriDevi({carrcade: carrierId})            
             const carrdeviPayload = {
                 carrcade: carrierId,
-                devicade: deviceId
+                devicade: selectedDeviceId
             }
             if(deviceExists){
                 await carrierService.updateCarriDevi(deviceExists.cadenuid, carrdeviPayload);

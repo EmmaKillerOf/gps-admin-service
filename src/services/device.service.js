@@ -17,13 +17,12 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     query = { '$entityDevice.userende$': secondEntityUserId.enusnuid }
   } else if (userSelectedId != 'null' && secondEntityUserId && secondEntityUserId.enusrole == 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
-  } else if (userSelectedId == 'null' && available) {
+  } else if (userSelectedId == 'null' && available && entityUserSession && entityUserSession.enusrole != 'ADMIN') {
     query = { '$entityDevice.userende$': entityUserSession.enusnuid }
   }
-
   const availableQuery = available ? { '$carrdevi.carrcade$': { [Op.eq]: carrId } } : {}
   let queryUser = {};
-  if ((userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || available) {
+  if ((userSelectedId !== 'null' && entityUserSession.enusrole !== 'ADMIN') || (available && entityUserSession.enusrole != 'ADMIN')) {
     queryUser = {
       [Op.or]: [
         //{ '$entityDevice.userende$': entityUserSession.enusnuid },
@@ -111,7 +110,7 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     having: userSelectedId != 'null' && secondEntityUserId && entityUserSession && secondEntityUserId.enusrole != 'ADMIN' && entityUserSession.enusrole != 'ADMIN' ? havingCondition : undefined,
     raw: false,
     nest: true,
-    //logging:true
+    logging: false
   });
   combinedDevices = {
     rows: [...devices.rows]
@@ -139,7 +138,13 @@ const getDevices = async (entityId, available, entityUserId = null, userSelected
     };
   }
   combinedDevices.rows = combinedDevices.rows.map(convertCheckValue);
-
+  const { getKmTravelTemp } = require("../controllers/travel.controller");
+  let startDat = getDateActually(), endDat = getDateActually();
+  let minutesStart = hasTimeIncluded(startDat, 'start');
+  let minutesEnd = hasTimeIncluded(endDat, 'end');
+  for (const e of combinedDevices.rows) {
+    e.dataValues.today = await getKmTravelTemp(e.devinuid, startDat + minutesStart, endDat + minutesEnd);
+  }
   return combinedDevices;
 }
 
@@ -242,9 +247,13 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
 
 const calculateKmTemp = async (deviceResult, startDate, endDate) => {
   const { getKmTravelTemp, getTimes } = require("../controllers/travel.controller");
+  let startDat = getDateActually(), endDat = getDateActually();
+  let minutesStart = hasTimeIncluded(startDat, 'start');
+  let minutesEnd = hasTimeIncluded(endDat, 'end');
   for (const e of deviceResult) {
     e.kmTotally = await getKmTravelTemp(e.devinuid, startDate, endDate);
     e.times = await getTimes(e.devinuid, startDate, endDate);
+    e.today = await getKmTravelTemp(e.devinuid, startDat + minutesStart, endDat + minutesEnd);
   }
   return deviceResult;
 }
@@ -316,30 +325,30 @@ function processAndTransform(deviceResult) {
       }));
 
       allEntries.push(...devilocaEntries);
-}
-if (device.devialar) {
-  const devialarEntries = device.devialar.map(entry => {
-    const transformedEntry = {
-      ...entry.dataValues,
-      source: 'devialar'
-    };
-    if (entry.dataValues.keywords.dataValues && entry.dataValues.keywords.dataValues.keytype && entry.dataValues.keywords.dataValues.keyalarm) {
-      transformedEntry.keywords.dataValues.keytypenomb = 'alarm';
-    } else {
-      transformedEntry.keywords.dataValues.keytypenomb = 'event';
     }
-    return transformedEntry;
+    if (device.devialar) {
+      const devialarEntries = device.devialar.map(entry => {
+        const transformedEntry = {
+          ...entry.dataValues,
+          source: 'devialar'
+        };
+        if (entry.dataValues.keywords.dataValues && entry.dataValues.keywords.dataValues.keytype && entry.dataValues.keywords.dataValues.keyalarm) {
+          transformedEntry.keywords.dataValues.keytypenomb = 'alarm';
+        } else {
+          transformedEntry.keywords.dataValues.keytypenomb = 'event';
+        }
+        return transformedEntry;
+      });
+      allEntries.push(...devialarEntries);
+    }
   });
-  allEntries.push(...devialarEntries);
-}
+  let transformedEntries = allEntries
+    .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
+    .map(transformEntry);
+  infoDevices.forEach(e => {
+    e.locations = transformedEntries.filter(x => x.devidelo == e.devinuid);
   });
-let transformedEntries = allEntries
-  .sort((a, b) => b.delotinude.localeCompare(a.delotinude))
-  .map(transformEntry);
-infoDevices.forEach(e => {
-  e.locations = transformedEntries.filter(x => x.devidelo == e.devinuid);
-});
-return infoDevices;
+  return infoDevices;
 }
 
 function transformEntry(entry) {
