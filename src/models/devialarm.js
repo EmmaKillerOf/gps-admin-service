@@ -75,6 +75,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: true,
       type:DataTypes.STRING 
     },
+    dealacc:{ 
+      allowNull: true,
+      type:DataTypes.STRING 
+    },
+    dealdoor:{ 
+      allowNull: true,
+      type:DataTypes.STRING 
+    },
     delotinude:{
       allowNull: false,
       type:DataTypes.DATE        

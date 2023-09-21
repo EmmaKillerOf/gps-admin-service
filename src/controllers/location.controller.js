@@ -382,6 +382,8 @@ const alarmMapping = async (data) => {
     deallong: getLocationPoint(data[9], data[10]),
     dealloor: data[10],
     dealspee: calcSpeed(data[11]),
+    dealacc: data[14],
+    dealdoor: data[15],
     delotinude: getDatefromTimeAndHours(data[2]),
     delodire: '',
     delobarri: '',
