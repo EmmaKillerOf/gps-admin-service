@@ -220,6 +220,8 @@ const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) =>
     deallong: payload.delolong,
     dealloor: payload.deloloor,
     dealspee: payload.delospee,
+    dealacc: payload.deloacc,
+    dealdoor: payload.delodoor,
     delotinude: payload.delotinude,
     delodire: payload.delodire,
     delobarri: payload.delobarri,
