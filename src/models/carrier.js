@@ -34,15 +34,15 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING
     },
     combucarr: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.INTEGER
     },
     carrcapa: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.INTEGER
     },
     carrrendi: {
-      allowNull: false,
+      allowNull: true,
       type: DataTypes.INTEGER
     },
   }, {
