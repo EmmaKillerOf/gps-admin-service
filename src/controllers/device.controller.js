@@ -20,7 +20,8 @@ const createDevice = async (req, res) => {
             devimark: brand,
             devimode: model,
             deviphon: phoneNumber,
-            devistat: true
+            devistat: true,
+            deviestacomma: true
         }
 
         const newDevice = await deviceService.createDevice(devicePayload);
