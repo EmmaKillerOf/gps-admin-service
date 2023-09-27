@@ -10,27 +10,27 @@ const createCarrier = async (req, res) => {
 
     try {
         const { entityId } = req.params;
-        const { idNumber, type, deviceId } = req.body;
+        const { plate, type, selectedDeviceId } = req.body;
     
-        const carrier = await carrierService.getCarrier({ carrlice: idNumber, enticarr: entityId });
+        const carrier = await carrierService.getCarrier({ carrlice: plate, enticarr: entityId });
         if (carrier) throw 'Este vehiculo ya existe';
         
         const carrierPayload = {
             enticarr: entityId,
-            carrlice: idNumber,
+            carrlice: plate,
             carrtype: type,
         }
         const newCarrier = await carrierService.createCarrier(carrierPayload);
         
-        if(deviceId) {
-            const device = await deviceService.getDevice({ devinuid: deviceId });
+        if(selectedDeviceId) {
+            const device = await deviceService.getDevice({ devinuid: selectedDeviceId });
             if (!device) throw 'El dispositivo que intenta asociar no existe';
             const carrdeviPayload = {
                 carrcade: newCarrier.carrnuid,
-                devicade: deviceId
+                devicade: selectedDeviceId
             }
 
-            const carridevi = await carrierService.getCarriDevi({devicade: deviceId})
+            const carridevi = await carrierService.getCarriDevi({devicade: selectedDeviceId})
             if (carridevi) throw 'El dispositivo ya esta vinculado a otro vehiculo'
             await carrierService.createCarriDevi(carrdeviPayload);
         }
