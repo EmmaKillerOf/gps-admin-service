@@ -24,9 +24,9 @@ const sendCommand = async (req, res) => {
         const arrCommandsRedis = setParams(info[0], info[1], aux, 'REDIS', req);
         await commandService.sendCommand(arrCommandsSQL);
         sendCommandRedis(arrCommandsRedis);
-        if(req.uid){
-            return true;
-        }
+        /* if(req.uid){
+            return res.status(200).json({response: true});
+        } */
         return res.status(200).json({response: true});
     } catch (error) {
         console.log(error)
