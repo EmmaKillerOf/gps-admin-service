@@ -5,7 +5,6 @@ const getCommandsAvailable = async () => {
     attributes: [['stepid', 'stepexec'], 'stepdesc', 'stepparam'],
     where: {
       stepverclien: 1,
-      stepparam: 0
     }
   });
 
