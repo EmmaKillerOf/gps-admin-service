@@ -207,7 +207,7 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
         }
       }
     }
-    if (isLocation) {
+    if (isLocation && typeReport != 4) {
       includeArray.push(getLocationInclude(dateQuery, limits));
     }
     if (isAlarm || isEvent) {
@@ -247,18 +247,57 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
 };
 
 const calculateKmTemp = async (deviceResult, startDate, endDate) => {
-  const { getKmTravelTemp, getTimes } = require("../controllers/travel.controller");
+  const { getKmTravelTemp, getTimes, getKmTravelTempByDay } = require("../controllers/travel.controller");
   let startDat = getDateActually(), endDat = getDateActually();
   let minutesStart = hasTimeIncluded(startDat, 'start');
   let minutesEnd = hasTimeIncluded(endDat, 'end');
   for (const e of deviceResult) {
-    e.kmTotally = await getKmTravelTemp(e.devinuid, startDate, endDate);
+    const calculateKm = await getKmTravelTempByDay(e.devinuid, startDate, endDate);
+    const roundedDistanceByDay = roundKmTotally(calculateKm);
+    const adjustedKmTotalPerDay = adjustKmTotalPerDay(roundedDistanceByDay);
+    const sumKmTotalPerDay = adjustedKmTotalPerDay.reduce((accumulator, currentValue) => {
+      return accumulator + currentValue.value;
+    }, 0);
+    e.kmTotalPerDay = adjustedKmTotalPerDay;
+    e.kmTotally = sumKmTotalPerDay;
     e.times = await getTimes(e.devinuid, startDate, endDate);
     e.today = await getKmTravelTemp(e.devinuid, startDat + minutesStart, endDat + minutesEnd);
   }
   return deviceResult;
 }
 
+const roundKmTotally = (data) => {
+  if (typeof data === 'object') {
+    const roundedData = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        if (typeof data[key] === 'object') {
+          roundedData[key] = {};
+          for (const subKey in data[key]) {
+            if (data[key].hasOwnProperty(subKey)) {
+              roundedData[key][subKey] = Math.ceil(data[key][subKey]);
+            }
+          }
+        } else {
+          roundedData[key] = Math.ceil(data[key]);
+        }
+      }
+    }
+    return roundedData;
+  } else {
+    return data;
+  }
+};
+
+const adjustKmTotalPerDay = (kmTotalPerDay) => {
+  const adjustedData = [];
+  for (const date in kmTotalPerDay) {
+    if (kmTotalPerDay.hasOwnProperty(date)) {
+      adjustedData.push({ date, value: kmTotalPerDay[date] });
+    }
+  }
+  return adjustedData;
+};
 
 const getLocationInclude = (dateQuery, limits) => ({
   model: deviloca,

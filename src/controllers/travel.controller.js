@@ -209,6 +209,38 @@ function timeMovementsByDay(time1, time2) {
   return Object.values(result);
 }
 
+const getKmTravelTempByDay = async (deviceId, dateInit, dateFinal) => {
+  try {
+    const travels = await travelService.getTravelTemp(deviceId, dateInit, dateFinal);
+    const distanceByDay = {};
+    if (travels.length > 0) {
+      for (let i = 0; i < travels.length - 1; i++) {
+        const punto1 = travels[i];
+        const punto2 = travels[i + 1];
+        const date = punto1.delotinu;
+        if (distanceByDay[date]) {
+          distanceByDay[date] += haversineDistance(
+            punto1.delolati,
+            punto1.delolong,
+            punto2.delolati, 
+            punto2.delolong
+          );
+        } else {
+          distanceByDay[date] = haversineDistance(
+            punto1.delolati,
+            punto1.delolong,
+            punto2.delolati,
+            punto2.delolong
+          );
+        }
+      }
+    }
+    return distanceByDay;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
   try {
     const travels = await travelService.getTravelTemp(deviceId, dateInit, dateFinal);
@@ -217,6 +249,7 @@ const getKmTravelTemp = async (deviceId, dateInit, dateFinal) => {
       for (let i = 0; i < travels.length - 1; i++) {
         const punto1 = travels[i];
         const punto2 = travels[i + 1];
+        const date = punto1.delotinu;
         DistanceTotal += haversineDistance(
           punto1.delolati,
           punto1.delolong,
@@ -334,5 +367,6 @@ module.exports = {
   workCalculateAllDevices,
   getTravelMonthly,
   getKmTravelTempRoute,
+  getKmTravelTempByDay,
   getTimes
 }
