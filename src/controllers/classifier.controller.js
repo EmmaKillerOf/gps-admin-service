@@ -102,7 +102,7 @@ const updateClassifier = async (req, res) => {
         const classifierId = Number(req.params.classifierId)
         const { name, status } = req.body;
 
-        const classifier = await classifierService.getChildClassifier({ clvanuid:  classifierId});
+        const classifier = await classifierService.getClassifier({ clasnuid:  classifierId});
         if (!classifier) throw  'Clasificador no existe';
         const classifierPayload = {
             clasdesc: name.toLowerCase() || classifier.clvadesc,
