@@ -4,7 +4,7 @@
         "username": "usergps",
         "password": "G3st10n.2022",
         "database": "bdgps",
-        "host": "127.0.0.1",
+        "host": "190.85.170.13",
         "dialect": "mysql",
         "query": { 
             "raw": true,

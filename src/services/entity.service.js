@@ -72,6 +72,7 @@ const updateEntityUser = async (payload, uid) => {
       enusnuid: uid
     }
   });
+  
   return entityUser.findOne({ where:{ enusnuid: uid }});
 }
 
