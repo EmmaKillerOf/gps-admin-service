@@ -12,7 +12,7 @@ const getUser = async (req, res) => {
         const userId = req.query.userId || req.uid
         let users,
             privileges,
-            usersFiltrered
+            usersFiltrered;
 
         // Get privilegies
         if (entityId != undefined && privilegies != undefined) {
@@ -84,9 +84,8 @@ const createUser = async (req, res) => {
     try {
         const { entityId } = req.params;
         const { name, email, privileges, deviceSelected } = req.body
-        let user
+        let user = await userService.getUser({ username: email });
 
-        user = await userService.getUser({ username: email })
         const passwordGenerated = generatePassword();
         const passwordEncrypted = await encryptPassword(passwordGenerated);
 
@@ -146,19 +145,23 @@ const updateUser = async (req, res) => {
     try {
         const { entityId, userId } = req.params;
         const { name, privileges, deviceSelected, status } = req.body;
-        let user
-        user = await userService.getUser({ usernuid: userId });
+        
+        let user = await userService.getUser({ usernuid: userId });
         if (!user) throw 'Usuario que intenta actualizar no existe';
+
         const entityUser = await entityService.getEntityUser({ userenus: user.usernuid, entienus: entityId });
         if (!entityUser) throw 'Este usuario no esta vinculado a esta entidad';
-        const entityUserSession = await entityService.getEntityUser({ userenus: req.uid, entienus: entityId });
-        if (name) user = await userService.updateUser(userId, { fullname: name })
-        await entityService.updateEntityUser({ enusstat: status }, entityUser.enusnuid);
 
+        const entityUserSession = await entityService.getEntityUser({ userenus: req.uid, entienus: entityId });
+
+        if (name) user = await userService.updateUser(userId, { fullname: name });
+        const entityUsr =await entityService.updateEntityUser({ enusstat: status }, entityUser.enusnuid);
+    
         if (entityUserSession.enusrole != 'ADMIN') {
             const devices = await deviceService.getDevices(entityId, null, entityUser.enusnuid, userId, entityUser, entityUserSession);
             const trues = devices.rows.filter(e => e.dataValues.check).map(e => e.dataValues.devinuid);
             const toDelete = trues.filter(e => !deviceSelected.includes(e));
+
             if (toDelete.length > 0) {
                 await entityDeviceService.deleteEntityDevice({ userende: entityUser.enusnuid, deviende: toDelete });
             }
@@ -184,7 +187,15 @@ const updateUser = async (req, res) => {
             })
             await Promise.all(permissionPromises)
         }
-        console.log(user);
+
+        const changeEntiUser = await entityService.getEntityUser({ userenus: user.usernuid, entienus: entityId });
+        if (!changeEntiUser) throw 'Este usuario no esta vinculado a esta entidad';
+
+        let entiUser = {...user.dataValues, ...entityUsr};
+        entiUser.enusstat = entiUser.enusstat === 1 ? true:false;
+        entiUser = await deleteProp(entiUser, ['enusnuid', 'entienus', 'enusrole', 'userenus', 'enuspend']);
+        
+        user = entiUser;
         res.status(200).json({
             ok: true,
             response: user
@@ -215,7 +226,11 @@ const deleteUser = async (req, res) => {
             message: error instanceof ReferenceError ? error.message : error
         })
     }
+}
 
+async function deleteProp(objeto, props) {
+    props.forEach(prop => delete objeto[prop]);
+    return objeto;
 }
 
 module.exports = {

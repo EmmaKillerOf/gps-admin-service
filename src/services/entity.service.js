@@ -66,12 +66,13 @@ const updateEntity = async (entityId, payload) => {
 }
 
 const updateEntityUser = async (payload, uid) => {
-  const entityResult = await entityUser.update({...payload}, {
+
+  await entityUser.update({...payload}, {
     where: {
       enusnuid: uid
     }
-  })
-  /* return entity.findOne({ where:{ entinuid: entityId }, raw : false,}) */
+  });
+  return entityUser.findOne({ where:{ enusnuid: uid }});
 }
 
 const createEntityUser = async (payload) => {

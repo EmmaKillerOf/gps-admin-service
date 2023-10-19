@@ -7,8 +7,8 @@ const config = require('../config/environment')
 
 
 let verificaToken = (req, res, next) => {
-
-    let token = req.header('token'); 
+    let token = req.header('token');
+    
     try {
         const user = jwt.verify(token, config.TOKEN.SECRET)
         req.uid = user.usernuid

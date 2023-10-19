@@ -9,9 +9,6 @@ const redisConfig = {
 };
 
 const client = new Redis(redisConfig);
-
-let listMesssages = [];
-
 client.on('connect', () => {
     console.log('Conectado a Redis');
 });
