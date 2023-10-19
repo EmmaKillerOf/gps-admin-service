@@ -32,7 +32,6 @@
         "jstoxml": "^3.2.3",
         "mailgun-js": "^0.22.0",
         "moment": "^2.29.1",
-        "moment-timezone": "^0.5.43",
         "morgan": "^1.10.0",
         "mysql2": "^2.3.3",
         "node-cron": "^3.0.2",
