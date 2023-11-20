@@ -192,27 +192,46 @@ const getDateActually = () => {
   return formattedDate;
 }
 
+// Función asincrónica para obtener la ubicación del dispositivo
 const getDeviceLocation = async ({ devices, plate, startDate = getDateActually(), endDate = getDateActually(), isAlarm, isLocation = true, isEvent, typeReport }) => {
   try {
+    // Arreglo para almacenar las inclusiones
     const includeArray = [];
+
+    // Obtiene los minutos de inicio y fin
     const minutesStart = hasTimeIncluded(startDate, 'start');
     const minutesEnd = hasTimeIncluded(endDate, 'end');
+
+    // Consulta condicional para placa
     const plateQuery = plate ? { [`$carrdevi.carrier.carrlice$`]: plate } : {}
+
+    // Determina los límites para el tipo de informe
     const limits = typeReport != 3 ? 1 : null; 
-    const dateQuery = {
-      delotinude: {
-        [Op.and]: {
-          [Op.gte]: startDate + minutesStart,
-          [Op.lte]: endDate + minutesEnd
+    let dateQuery = {};
+    if (typeReport != 2) {
+      // Consulta de fecha para filtrar por rango de fechas
+      dateQuery = {
+        delotinude: {
+          [Op.and]: {
+            [Op.gte]: startDate + minutesStart,
+            [Op.lte]: endDate + minutesEnd
+          }
         }
       }
     }
+    
+    // Si es ubicación y no es tipo de informe 4, incluye la ubicación
     if (isLocation && typeReport != 4) {
+      console.log(dateQuery);
       includeArray.push(getLocationInclude(dateQuery, limits));
     }
+
+    // Si es alarma o evento, incluye la alarma
     if (isAlarm || isEvent) {
       includeArray.push(getAlarmInclude(dateQuery, isAlarm, isEvent));
     }
+
+    // Incluye información del dispositivo y el transportista
     includeArray.push({
       model: carrdevi,
       as: 'carrdevi',
@@ -222,6 +241,8 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
         as: 'carrier',
       }
     });
+
+    // Incluye información de kilometraje con fecha dentro del rango
     includeArray.push({
       model: kmdevi,
       as: 'kmdevi',
@@ -236,15 +257,24 @@ const getDeviceLocation = async ({ devices, plate, startDate = getDateActually()
       },
       separate: true
     });
+
+    // Obtiene los datos del dispositivo
     const deviceResult = await fetchDeviceData(devices, plateQuery, includeArray);
-    /* console.log(deviceResult[0]); */
+
+    // Procesa y transforma los datos obtenidos
     const transformedEntries = processAndTransform(deviceResult);
+
+    // Calcula los kilómetros totales
     const kmTotally = calculateKmTemp(transformedEntries, startDate + minutesStart, endDate + minutesEnd);
+
+    // Devuelve los kilómetros totales
     return kmTotally;
   } catch (error) {
+    // Manejo de errores
     console.log(error);
   }
 };
+
 
 const calculateKmTemp = async (deviceResult, startDate, endDate) => {
   const { getKmTravelTemp, getTimes, getKmTravelTempByDay } = require("../controllers/travel.controller");

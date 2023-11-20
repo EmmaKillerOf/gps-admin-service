@@ -208,11 +208,14 @@ const getDevicePositions = async (req, res) => {
     const { entityId } = req.params;
     const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId })
     if (!entityUser) throw "Usuario no autorizado en esta entidad";
+
     const { classifiers, plate, deviceIds = [], isAlarm, isLocation, isEvent, date, typeReport } = req.body;
     const devices = [];
     const hasDate = date ? { startDate, endDate } = date : {};
+
     const classifiersDevice = (await getDevicesByClassifier(classifiers)).map(device => device.deviclde)
     devices.push(...deviceIds, ...classifiersDevice);
+    
     const hasDevices = devices.length ? { devices: [...new Set(devices)] } : {}
     const payload = {
       ...hasDate,
@@ -223,10 +226,8 @@ const getDevicePositions = async (req, res) => {
       isEvent, 
       typeReport
     }
-    let locations;
 
-    locations = await deviceService.getDeviceLocation(payload)
-
+    let locations = await deviceService.getDeviceLocation(payload);
     globalResponse({ resInstance: res, response: locations });
 
     // res.status(200).json({
@@ -241,7 +242,6 @@ const getDevicePositions = async (req, res) => {
     })
 
   }
-
 }
 
 const globalResponse = async ({ resInstance, status = 200, response, hasError = false }) => {
@@ -260,7 +260,6 @@ const globalResponse = async ({ resInstance, status = 200, response, hasError = 
 
 const getLocationByCarrier = async ({ carrier, startDate, endDate, entityId }) => {
   const device = await deviceService.getDeviceByCarrier(entityId, carrier)
-  console.log(device.devinuid)
   return await deviceService.getDeviceLocation({ devices: [device.devinuid], startDate, endDate })
 }
 
@@ -435,5 +434,5 @@ const calcSpeed = (speed) => {
 module.exports = {
   createLocation,
   createLocationsFromRedis,
-  getDevicePositions
+  getDevicePositions,
 }

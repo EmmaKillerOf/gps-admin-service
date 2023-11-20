@@ -8,7 +8,6 @@ const login = async(req, res) => {
     let body = req.body;
     try {
       const user = await User.findOne({ where:{ username: body.username }})
-      console.log(user)
       if (!user || !bcrypt.compareSync(body.password, user.userpass)) {
           return res.status(401).json({
               ok: false,

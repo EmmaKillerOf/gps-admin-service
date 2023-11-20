@@ -36,8 +36,7 @@ const createEntity = async (req, res) => {
         if (!entity) entity = await entityService.createEntity(entityPayload);
         const passwordGenerated = generatePassword();
         const passwordEncrypted = await encryptPassword(passwordGenerated);
-        console.log({passwordGenerated,passwordEncrypted})
-    
+
         const userPayload = {
             username: email,
             userpass: passwordEncrypted,

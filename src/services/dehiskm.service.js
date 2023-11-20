@@ -9,7 +9,6 @@ const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.pass
 })
 
 const createHistKm = async (payload) => {
-  console.log(payload);
   return await dehiskm.bulkCreate([...payload]);
 }
 

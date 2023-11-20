@@ -1,10 +1,10 @@
 {
 
     "DB": {
-        "username": "root",
-        "password": "200319",
-        "database": "gps",
-        "host": "127.0.0.1",
+        "username": "sharedlocal",
+        "password": "54321",
+        "database": "bdgps",
+        "host": "192.168.10.234",
         "dialect": "mysql",
         "query": { 
             "raw": true,
