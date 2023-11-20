@@ -73,7 +73,6 @@ const getTravelMonthly = async (deviceIds, month, year) => {
     raw: false,
     nest: true
   });
-  console.log(results);
   return results;
 }
 

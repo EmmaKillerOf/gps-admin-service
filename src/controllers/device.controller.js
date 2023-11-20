@@ -46,15 +46,16 @@ const getDevices = async (req, res) => {
         const { available, limit, offset } = req.query;
         const { entityId, userSelectedId, carrId } = req.params;
         const userId = userSelectedId != 'null' ? userSelectedId : req.uid;
-        let devices;
+
+        let devices = {};
         const entityUser = await entityService.getEntityUser({ entienus: entityId, userenus: userId });
         const entityUserSession = await entityService.getEntityUser({ entienus: entityId, userenus: req.uid });
         if (!entityUser) {
             throw "Este usuario no tiene entidades asociadas";
         }
+        
         const enusnuid = entityUser.enusrole === 'ADMIN' ? null : entityUser.enusnuid;
         devices = await deviceService.getDevices(entityId, available, enusnuid, userSelectedId, entityUser, entityUserSession, carrId);
-
         /* else {
             devices = await deviceService.getDevices(entityId, available, null, userSelectedId);
         } */
@@ -99,9 +100,8 @@ const updateDevice = async (req, res) => {
             const clasdeviPayload = uniqueClassifiers.map(c => {
                 return { deviclde: deviceId, clvaclde: c }
             })
-            console.log(clasdeviPayload)
             await deviceService.deleteClasdevi(deviceId);
-            await deviceService.createClasdevi(clasdeviPayload)
+            await deviceService.createClasdevi(clasdeviPayload);
         }
 
         res.status(200).json({

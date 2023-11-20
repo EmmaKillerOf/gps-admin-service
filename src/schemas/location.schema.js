@@ -18,7 +18,7 @@ const GetLocationsSchema = Joi.object({
     entityId:Joi.number().required(),
   }),
   query: Joi.optional()
-})
+});
 
 module.exports = {
   GetLocationsSchema

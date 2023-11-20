@@ -75,7 +75,6 @@ module.exports = (sequelize, DataTypes) => {
   // Agregar hook después de actualizar (afterUpdate)
   device.afterUpdate((instance, options) => {
     const observableDevice = require('../observables/device');
-    console.log("actualizado");
     observableDevice.sendDevices('listDevices')
     .then(() => {
       console.log('Lista de dispositivos actualizada después de actualizar un registro.');

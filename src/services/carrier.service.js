@@ -86,7 +86,6 @@ const getCarriDevi = async (query) => {
       ...query
     }
   })
-  console.log({carrierResult})
   return carrierResult
 }
 
