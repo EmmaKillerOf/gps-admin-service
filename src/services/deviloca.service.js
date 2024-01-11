@@ -78,7 +78,7 @@ const createLocation = async (payload) => {
   if (lastRecords.length < 2) {
     if (!positions.some(x => x.delotime === delotime && x.devidelo === devidelo)) {
       positions.push(payload);
-      await new Promise((resolve) => {
+      /* await new Promise((resolve) => {
         setTimeout(async () => {
           const getAdress = await getDirections(delolati, delolong);
           payload.delodire = getAdress[0];
@@ -89,7 +89,7 @@ const createLocation = async (payload) => {
           await deviloca.create(payload);
           resolve();
         }, 1100);
-      });
+      }); */
     } else {
       positions = [];
     }
@@ -200,7 +200,8 @@ const processParkingCondition = async (deloacc, lastRecordPark, validateEventPar
 
 const createPayloadAlarm = async (payload, typeIdAlarm, getDirection = false) => {
   if (getDirection) {
-    const getAdress = await getDirections(payload.delolati, payload.delolong);
+    //const getAdress = await getDirections(payload.delolati, payload.delolong);
+    const getAdress = ["","","","","",""];
     payload.delodire = getAdress[0];
     payload.delobarri = getAdress[1];
     payload.delomuni = getAdress[2];
