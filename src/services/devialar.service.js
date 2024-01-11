@@ -25,7 +25,7 @@ const createAlarm = async (payload) => {
   /* if (lastRecord.length < 2) { */
     if (aux.length == 0) {
       positions.push(payload);
-      await new Promise((resolve) => {
+      /* await new Promise((resolve) => {
         setTimeout(async () => {
           const getAdress = await getDirections(payload.deallati, payload.deallong);
           payload.delodire = getAdress[0];
@@ -36,7 +36,7 @@ const createAlarm = async (payload) => {
           await devialar.create({ ...payload })
           resolve();
         }, 1100);
-      });
+      }); */
     } else {
       positions = [];
     }
