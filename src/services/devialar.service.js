@@ -37,6 +37,7 @@ const createAlarm = async (payload) => {
           resolve();
         }, 1100);
       }); */
+      return await devialar.create({ ...payload })
     } else {
       positions = [];
     }

@@ -90,6 +90,7 @@ const createLocation = async (payload) => {
           resolve();
         }, 1100);
       }); */
+      return await deviloca.create(payload);
     } else {
       positions = [];
     }
