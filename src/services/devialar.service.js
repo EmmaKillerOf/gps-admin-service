@@ -25,18 +25,18 @@ const createAlarm = async (payload) => {
   /* if (lastRecord.length < 2) { */
     if (aux.length == 0) {
       positions.push(payload);
-      /* await new Promise((resolve) => {
+      await new Promise((resolve) => {
         setTimeout(async () => {
-          const getAdress = await getDirections(payload.deallati, payload.deallong);
+          /* const getAdress = await getDirections(payload.deallati, payload.deallong);
           payload.delodire = getAdress[0];
           payload.delobarri = getAdress[1];
           payload.delomuni = getAdress[2];
           payload.delodepa = getAdress[3];
-          payload.delopais = getAdress[4];
+          payload.delopais = getAdress[4]; */
           await devialar.create({ ...payload })
           resolve();
         }, 1100);
-      }); */
+      });
       return await devialar.create({ ...payload })
     } else {
       positions = [];
