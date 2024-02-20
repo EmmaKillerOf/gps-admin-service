@@ -27,12 +27,12 @@ const createAlarm = async (payload) => {
       positions.push(payload);
       await new Promise((resolve) => {
         setTimeout(async () => {
-          /* const getAdress = await getDirections(payload.deallati, payload.deallong);
+          const getAdress = await getDirections(payload.deallati, payload.deallong);
           payload.delodire = getAdress[0];
           payload.delobarri = getAdress[1];
           payload.delomuni = getAdress[2];
           payload.delodepa = getAdress[3];
-          payload.delopais = getAdress[4]; */
+          payload.delopais = getAdress[4];
           await devialar.create({ ...payload })
           resolve();
         }, 1100);
@@ -57,7 +57,7 @@ const createAlarm = async (payload) => {
 
 const getDirections = async (latitude, longitude) => {
   try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+    const response = await axios.get(`http://181.49.26.202:4000/nominatim/reverse.php?lat=${latitude}&lon=${longitude}&format=json`);
     const data = response.data;
 
     let address = data.display_name;
