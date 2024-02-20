@@ -281,7 +281,7 @@ const getRowsUpdate = async (deviceId, init, fin) => {
 
 const getDirections = async (latitude, longitude) => {
   try {
-    const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
+    const response = await axios.get(`http://181.49.26.202:4000/nominatim/reverse.php?lat=${latitude}&lon=${longitude}&format=json`);
     const data = response.data;
 
     let address = data.display_name;
