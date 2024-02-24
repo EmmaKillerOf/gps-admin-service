@@ -30,8 +30,8 @@ if (config.use_env_variable) {
     logging: false
   });
 } else {
-  //sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
-    sequelize = new Sequelize(config.DB.database, {
+  sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
+  //sequelize = new Sequelize(config.DB.database, {
     dialect: 'mysql',
     host:config.DB.host,
     port: config.DB.port,
