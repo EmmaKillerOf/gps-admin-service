@@ -1,8 +1,8 @@
 {
 
     "DB": {
-        "username": "",
-        "password": "",
+        "username": "stnduser",
+        "password": "G3st10nfscr.2021",
         "database": "bdgps",
         "host": "190.85.170.13",
         "port": 6033, 
