@@ -1,7 +1,8 @@
 {
 
     "DB": {
-        
+        "username": "",
+        "password": "",
         "database": "bdgps",
         "host": "190.85.170.13",
         "port": 6033, 
