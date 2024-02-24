@@ -5,6 +5,7 @@
         "password": "G3st10n.2022",
         "database": "bdgps",
         "host": "190.85.170.13",
+        "port": 6033, 
         "dialect": "mysql",
         "query": { 
             "raw": true,
