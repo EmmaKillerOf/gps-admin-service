@@ -1,11 +1,11 @@
 {
 
     "DB": {
-        "username": "usergps",
-        "password": "G3st10n.2022",
+        "username": "adminserver",
+        "password": "G3st10nfscr.2021",
         "database": "bdgps",
-        "host": "190.85.170.13",
-        "port": 3306,
+        "host": "181.49.26.202",
+        "port": 3706,
         "dialect": "mysql",
         "query": { 
             "raw": true,
