@@ -3,6 +3,40 @@ const { device, carrdevi, entityDevice, carrier, clasdevi, classvalue, deviloca,
 const { getClassifier } = require("./classifier.service");
 const { forEach } = require("underscore");
 
+const getDevicesToCalculate = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null, carrId) => {
+  
+  const attributes = [
+    'devinuid',
+    'entidevi',
+    'deviimei',
+    'devimark',
+    'devimode',
+    'deviphon',
+    'devistat',
+    'deviestacomma'
+  ];
+
+  if (userSelectedId == 'null' && !available) {
+    attributes.push([Sequelize.literal('false'), 'check'])
+  } else {
+    attributes.push([Sequelize.literal('true'), 'check'])
+  }
+  const order = [['devinuid', 'DESC']];
+
+  const devices = await device.findAndCountAll({
+    where: {
+      entidevi: entityId,
+      //...queryUser,
+    },
+    attributes,
+    order,
+    raw: false,
+    nest: true,
+    logging: false
+  });
+  
+  return devices;
+}
 const getDevices = async (entityId, available, entityUserId = null, userSelectedId = 'null', secondEntityUserId = null, entityUserSession = null, carrId) => {
   let query = {}, havingCondition = {};
 
@@ -658,5 +692,6 @@ module.exports = {
   createClasdevi,
   getDeviceLocation,
   getDeviceByCarrier,
-  getDeviceAlerts
+  getDeviceAlerts,
+  getDevicesToCalculate
 }

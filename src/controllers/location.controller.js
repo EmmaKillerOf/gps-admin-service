@@ -162,6 +162,7 @@ const createLocation = async (req, res) => {
 }
 
 const getTypeKey = async (data) => {
+  console.log(data);
   const typeKey = data[1] === 'tracker' ? '001' : data[1];
   let payload, key;
 

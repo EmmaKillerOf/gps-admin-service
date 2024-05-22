@@ -5,6 +5,7 @@ const { kmdevi, device, carrdevi, carrier, devialar } = require('../models');
 const config = require('../config/environment')
 const raw = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
   host: config.DB.host,
+  port: 3706,
   dialect: config.DB.dialect
 })
 const getTravel = async (deviceId, dateSelected) => {

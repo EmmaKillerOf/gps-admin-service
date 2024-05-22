@@ -6,10 +6,10 @@ switch (env) {
         config = require('../env/production');
         break;
     case 'development':
-        config = require('../env/development');
+        config = require('../env/production');
         break;
     case 'staging':
-        config = require('../env/staging');
+        config = require('../env/production');
         break;
 }
 

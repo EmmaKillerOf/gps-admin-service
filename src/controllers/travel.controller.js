@@ -29,7 +29,7 @@ const getTravel = async (req, res) => {
       const { delonuid } = travels[0];
       const { delonuid: lastDelonuid } = travels[travels.length - 1];
 
-      const payload = kmMapping([deviceId, delonuid, lastDelonuid, dateSelected, DistanceTotal, calculateConsum(DistanceTotal, device.carrdevi.carrier.carrrendi)]);
+      const payload = kmMapping([deviceId, delonuid, lastDelonuid, dateSelected, DistanceTotal, calculateConsum(DistanceTotal, 0)]);
       const kmHistoId = await travelService.createKm(payload);
 
       if (kmHistoId) {
@@ -341,7 +341,7 @@ const workCalculateAllDevices = async (req, res) => {
   for (let i = 0; i < entities.rows.length; i++) {
     const element = entities.rows[i];
     try {
-      const devices = await deviceService.getDevices(element.entinuid);
+      const devices = await deviceService.getDevicesToCalculate(element.entinuid);
       const datosDevice = devices.rows.map(objeto => objeto.dataValues);
       for (let j = 0; j < datosDevice.length; j++) {
         const e = datosDevice[j];
@@ -358,6 +358,43 @@ const workCalculateAllDevices = async (req, res) => {
 
   }
 }
+
+/* const workCalculateAllDevicesByFecha = async (req, res) => {
+  const startDate = new Date('2024-03-01'); // Fecha de inicio
+  const endDate = new Date('2024-04-03'); // Fecha de fin
+  const entities = await entityService.getEntities();
+  
+  try {
+    const devices = await deviceService.getDevicesToCalculate(1);
+    const datosDevice = devices.rows.map(objeto => objeto.dataValues);
+    
+    for (let j = 0; j < datosDevice.length; j++) {
+      const e = datosDevice[j];
+      console.log(e);
+      
+      // Iterar sobre las fechas desde '2024-03-01' hasta '2024-04-03'
+      for (let currentDate = new Date(startDate); currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+        const anio = currentDate.getFullYear();
+        const mes = currentDate.getMonth() + 1;
+        const dia = currentDate.getDate();
+        // Formatear la cadena de la fecha
+        const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+        console.log(fechaFormateada);
+        await getTravel({
+          params: {
+            deviceId: e.devinuid,
+            dateSelected: fechaFormateada,
+            device: e
+          }
+        });
+      }
+    }
+    console.log("terminado");
+  } catch (error) {
+    console.log(error);
+  }
+} */
+
 
 
 

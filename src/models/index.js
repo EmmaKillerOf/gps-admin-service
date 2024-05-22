@@ -12,6 +12,7 @@ if (config.use_env_variable) {
   sequelize = new Sequelize(process.env[config.use_env_variable],  {
     dialect: 'mysql',
     host:config.DB.host,
+    port: 3706,
     dialectOptions: {
       dateStrings: true,
       typeCast: function (field, next) { // for reading from database
@@ -30,8 +31,10 @@ if (config.use_env_variable) {
   });
 } else {
   sequelize = new Sequelize(config.DB.database, config.DB.username, config.DB.password, {
+  //sequelize = new Sequelize(config.DB.database, {
     dialect: 'mysql',
     host:config.DB.host,
+    port: 3706,
     dialectOptions: {
       dateStrings: true,
       typeCast: function (field, next) { // for reading from database
